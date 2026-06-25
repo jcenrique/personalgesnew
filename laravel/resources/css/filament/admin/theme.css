@@ -1,0 +1,41 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+@source '../../../../vendor/bezhansalleh/filament-language-switch/resources/views/**/*.blade.php';
+
+
+/* Aumentar el tamaño base */
+:root {
+    font-size: 18px; /* por defecto suele ser 14–16px */
+
+
+}
+
+
+
+/* ========= MODO CLARO ========= */
+.fi-ta thead th {
+    background-color: #e9e9e9 !important;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+
+
+/* ========= MODO OSCURO ========= */
+.dark .fi-ta thead th {
+    background-color: #1f2937 !important;
+    color: #f9fafb;
+}
+
+
+.bienmal-green {
+    color: var(--success-600);
+    font-weight: 700;
+}
+
+.bienmal-red {
+    color: var(--danger-600);
+    font-weight: 700;
+}

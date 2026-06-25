@@ -1,0 +1,47 @@
+# Crear la unidad para usuarios
+dn: ou=users,dc=softren,dc=com
+objectClass: organizationalUnit
+ou: users
+
+# Crear un usuario de prueba
+dn: uid=admin,ou=users,dc=softren,dc=com
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: jcenrique
+sn: jcenrique
+cn: super_admin
+mail: jcenrique@free.fr
+userPassword: password
+loginShell: /bin/bash
+uidNumber: 1000
+gidNumber: 1000
+homeDirectory: /home/admin
+
+# --- TÉCNICO DE RED ---
+dn: uid=lourdes,ou=users,dc=softren,dc=com
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: lourdes
+sn: Lourdes
+cn: tecnico_red
+mail: lourdes@free.fr
+userPassword: password
+uidNumber: 1001
+gidNumber: 1001
+homeDirectory: /home/lourdes
+
+# --- JEFE DE SERVICIO ---
+dn: uid=pedro,ou=users,dc=softren,dc=com
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: pedro
+sn: Pedro
+cn: jefe_servicio
+mail: pedro@free.fr
+userPassword: password
+uidNumber: 1002
+gidNumber: 1002
+homeDirectory: /home/pedro
