@@ -1,15 +1,43 @@
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import '../../../../vendor/guava/calendar/resources/css/theme.css';
 
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 @source '../../../../vendor/bezhansalleh/filament-language-switch/resources/views/**/*.blade.php';
-
+@source '../../../../vendor/guava/calendar/resources/**/*';
 
 /* Aumentar el tamaño base */
 :root {
     font-size: 18px; /* por defecto suele ser 14–16px */
 
+}
+/*
+.ec {
+  --ec-bg-color: #22272e;
+  --ec-text-color: #adbac7;
+} */
+html.dark .ec {
+    --ec-bg-color: ##111827;
 
+    background-color: var(--ec-bg-color) !important;
+}
+
+
+html.dark .ec * {
+    color: var(--ec-text-color) !important;
+}
+
+.bienmal-green {
+    padding-right: 5px;
+    color: var(--success-600);
+    font-weight: 700;
+}
+
+.bienmal-red {
+
+    padding-left: 5px;
+    color: var(--danger-600);
+    font-weight: 700;
 }
 
 
@@ -21,21 +49,8 @@
     font-weight: 600;
 }
 
-
-
 /* ========= MODO OSCURO ========= */
 .dark .fi-ta thead th {
     background-color: #1f2937 !important;
     color: #f9fafb;
-}
-
-
-.bienmal-green {
-    color: var(--success-600);
-    font-weight: 700;
-}
-
-.bienmal-red {
-    color: var(--danger-600);
-    font-weight: 700;
 }

@@ -5,7 +5,6 @@ namespace App\Models;
 use Guava\Calendar\Contracts\Eventable;
 use Guava\Calendar\ValueObjects\CalendarEvent;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
 
 class Reconocimiento extends Model implements Eventable
 {
@@ -13,11 +12,11 @@ class Reconocimiento extends Model implements Eventable
         'lugar',
         'user_id',
         'fecha',
-        'años'
+        'años',
     ];
 
     protected $casts = [
-        'fecha' => 'date'
+        'fecha' => 'date',
     ];
 
     public function user()
@@ -25,8 +24,7 @@ class Reconocimiento extends Model implements Eventable
         return $this->belongsTo(User::class);
     }
 
-
-    //scope para devolver solo los ultimos reconocimientos
+    // scope para devolver solo los ultimos reconocimientos
 
     public function scopeLatestPerUser($query)
     {
@@ -41,11 +39,9 @@ class Reconocimiento extends Model implements Eventable
         });
     }
 
-
     // This is where you map your model into a calendar resource object
     public function toCalendarEvent(): CalendarEvent
-
-{
+    {
         $styles = [
             'color' => '#14532d !important',
             // Applies the style if the condition (true) is met
@@ -55,13 +51,10 @@ class Reconocimiento extends Model implements Eventable
         ];
 
         return CalendarEvent::make($this)
-            ->title(__('Reconocimiento médico') )
+            ->title(__('Reconocimiento médico'))
             ->styles($styles)
-            ->allDay()
-            ->start($this->fecha)
-            ->end($this->fecha)
-
-
-        ;
+            ->allDay(false)
+            ->start($this->fecha->copy()->startOfDay())
+            ->end($this->fecha->copy()->endOfDay());
     }
 }

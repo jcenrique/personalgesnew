@@ -4,28 +4,24 @@ namespace App\Filament\Resources\Inspecciones\Pages;
 
 use App\Filament\Resources\Inspecciones\InspeccionResource;
 use App\Models\Elementoinspeccion;
-use App\Models\Inspeccion;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Validation\ValidationException;
 use Override;
 
 class CreateInspeccion extends CreateRecord
 {
     protected static string $resource = InspeccionResource::class;
 
-
-
     #[Override]
     public function getCreateAnotherFormAction(): Action
     {
         $action = parent::getCreateAnotherFormAction();
         $action->hidden(true);
+
         return $action;
     }
 
-    public  function afterCreate(): void
+    public function afterCreate(): void
     {
         // ❗ Si es inspección especial → NO crear elementos
         if ($this->record->type === 'especial') {
@@ -50,20 +46,17 @@ class CreateInspeccion extends CreateRecord
         }
     }
 
-
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-
 
         //
         if (
             $data['type'] === 'especial'
-            && (!empty($data['user_id_1'])
-                || !empty($data['user_id_2']))
+            && (! empty($data['user_id_1'])
+                || ! empty($data['user_id_2']))
         ) {
             return $data;
         } elseif ($data['type'] === 'especial') {
-
 
             $this->form->addError('user_id_1', 'Debe indicar JS o TR/TRH');
             $this->form->addError('user_id_2', 'Debe indicar JS o TR/TRH');
@@ -72,24 +65,21 @@ class CreateInspeccion extends CreateRecord
 
         }
 
-
         if (
             $data['type'] === 'periodica'
-            && (!empty($data['user_id_1'])
-                && !empty($data['user_id_2']))
+            && (! empty($data['user_id_1'])
+                && ! empty($data['user_id_2']))
         ) {
 
             return $data;
         } elseif ($data['type'] === 'periodica') {
 
-
             $this->form->addError('user_id_1', 'Debe indicar JS o TR/TRH');
             $this->form->addError('user_id_2', 'Debe indicar JS o TR/TRH');
 
             $this->halt(); //
 
         }
-
 
         return $data;
     }

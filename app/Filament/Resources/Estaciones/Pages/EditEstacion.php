@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\Estaciones\Pages;
 
-
-
 use App\Filament\Resources\Estaciones\EstacionResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;

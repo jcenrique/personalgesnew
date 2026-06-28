@@ -10,6 +10,7 @@ use Filament\Resources\Pages\ListRecords;
 class ListElementoinspeccions extends ListRecords
 {
     use HasResizableColumn;
+
     protected static string $resource = ElementoinspeccionResource::class;
 
     protected function getHeaderActions(): array

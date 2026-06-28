@@ -13,7 +13,6 @@ class Residencia extends Model
         return $this->belongsTo(Zona::class);
     }
 
-
     public function users()
     {
         return $this->belongsToMany(User::class);

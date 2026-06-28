@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Reconocimientos\Tables;
 
 use App\Models\Reconocimiento;
-use Carbon\Carbon;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -12,13 +12,11 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Icon;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\DB;
 
 class ReconocimientosTable
 {
@@ -35,15 +33,14 @@ class ReconocimientosTable
 
                 TextColumn::make('fecha')
                     ->label(__('Último'))
-                    //si la fecha esta entre la  6 meses a la proxima cita color naranja , si es igual o mayor a la actual color rojo, mientras verde
+                    // si la fecha esta entre la  6 meses a la proxima cita color naranja , si es igual o mayor a la actual color rojo, mientras verde
                     ->color(function ($record) {
 
-                        //fecha del reconocimeinto teorico
+                        // fecha del reconocimeinto teorico
                         $fecha = $record->fecha->addYear($record->años);
                         $diferencia = $fecha->diffInMonths(now());
 
-
-                        if ($diferencia>= -6 && $diferencia < 0) {
+                        if ($diferencia >= -6 && $diferencia < 0) {
 
                             return 'warning';
                         } elseif ($diferencia > -6) {
@@ -55,17 +52,12 @@ class ReconocimientosTable
                     ->date('d F Y')
                     ->sortable(),
 
-
-
-
                 TextColumn::make('lugar')
-                    ->label(__('Lugar'))
-                    ,
+                    ->label(__('Lugar')),
                 TextColumn::make('años')
                     ->label(__('Validez'))
                     ->numeric()
-                    ->suffix(' ' . __('años'))
-                    ,
+                    ->suffix(' '.__('años')),
 
                 TextColumn::make('proxima_cita')
                     ->label(__('Próximo teórico'))
@@ -74,7 +66,7 @@ class ReconocimientosTable
 
                     ->state(function ($record) {
 
-                        return $record->fecha->addYear($record->años);;
+                        return $record->fecha->addYear($record->años);
                     }),
 
                 TextColumn::make('created_at')
@@ -87,9 +79,9 @@ class ReconocimientosTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                 SelectFilter::make('user_id')
+                SelectFilter::make('user_id')
                     ->label(__('Usuario'))
-                    ->options(\App\Models\User::pluck('name', 'id'))
+                    ->options(User::pluck('name', 'id'))
                     ->searchable(),
             ])
             ->recordActions([
@@ -129,7 +121,7 @@ class ReconocimientosTable
                             ->required()
                             ->aboveErrorMessage([
                                 Icon::make(Heroicon::Star),
-                                'This is the content above the field\'s error message'
+                                'This is the content above the field\'s error message',
                             ])
                             ->label(__('Lugar reconocimiento')),
                         TextInput::make('años')
@@ -147,7 +139,7 @@ class ReconocimientosTable
                             'fecha' => $data['fecha'],
 
                             'lugar' => $data['lugar'],
-                            'años' =>  $data['años'],
+                            'años' => $data['años'],
                         ]);
                     }),
 
@@ -164,7 +156,7 @@ class ReconocimientosTable
                         return $fecha;
                     })
 
-                    ->tooltip(__('Delete'))
+                    ->tooltip(__('Delete')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

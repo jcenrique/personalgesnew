@@ -7,31 +7,27 @@ use App\Models\Additionalday;
 use App\Models\User;
 use Asmit\ResizedColumn\HasResizableColumn;
 use Filament\Actions\Action;
-
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Table;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Select;
-use Filament\Notifications\Notification;
-use Filament\Support\Enums\Width;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class AddAdittionaldays extends Page implements HasForms, HasTable
-
-
 {
-
-    use InteractsWithTable;
+    use HasResizableColumn;
     use InteractsWithForms;
-     use HasResizableColumn;
+    use InteractsWithTable;
 
     public array $cantidades = [];
 
@@ -39,11 +35,10 @@ class AddAdittionaldays extends Page implements HasForms, HasTable
 
     protected string $view = 'filament.resources.additionaldays.pages.add-adittionaldays';
 
-    //mostrar una tabla con todos los usuarios a excepcion de los superadministradores
+    // mostrar una tabla con todos los usuarios a excepcion de los superadministradores
     // la tabla debe contener una columna con el nombre de usuario y una columna con un spiner de incremento de dias adicionales
-    //este spinner contendrá la cuenta de los dias adiccionales del usuario por año seleccionado
-    //si no existen datos del año todo a cero
-
+    // este spinner contendrá la cuenta de los dias adiccionales del usuario por año seleccionado
+    // si no existen datos del año todo a cero
 
     public function getTitle(): string
     {
@@ -55,7 +50,6 @@ class AddAdittionaldays extends Page implements HasForms, HasTable
 
         return "Añadir días adicionales - {$year}";
     }
-
 
     protected function getHeaderActions(): array
     {
@@ -74,6 +68,7 @@ class AddAdittionaldays extends Page implements HasForms, HasTable
                         ->label(__('Año'))
                         ->options(function () {
                             $currentYear = date('Y');
+
                             return [
                                 $currentYear - 2 => $currentYear - 2,
                                 $currentYear - 1 => $currentYear - 1,
@@ -89,8 +84,8 @@ class AddAdittionaldays extends Page implements HasForms, HasTable
                     $year = (int) $data['year'];
 
                     $rows = Excel::toArray([], $data['file'])[0];
-                    //validar contenido
-                    $fila1 = array_map(fn($h) => strtolower(trim($h)), $rows[1]);
+                    // validar contenido
+                    $fila1 = array_map(fn ($h) => strtolower(trim($h)), $rows[1]);
 
                     if ($fila1[0] === '' || $fila1[1] === '') {
 
@@ -103,9 +98,9 @@ class AddAdittionaldays extends Page implements HasForms, HasTable
                         return;
                     }
 
-                    $header = array_map(fn($h) => strtolower(trim($h)), $rows[0]);
+                    $header = array_map(fn ($h) => strtolower(trim($h)), $rows[0]);
 
-                   //validar encabezado
+                    // validar encabezado
 
                     if ($header[0] !== 'codigo_agente' || $header[1] !== 'dias') {
 
@@ -121,25 +116,22 @@ class AddAdittionaldays extends Page implements HasForms, HasTable
                     $rowsCount = count($rows);
                     $protectedIds = [];
 
-
                     DB::transaction(function () use ($rows, $year, &$protectedIds) {
 
                         // 1️⃣ Obtener IDs que NO se deben borrar
 
                         $protectedAdditionalDayIds =
                             DB::table('disfrutes')
-                            ->where('disfrutable_type', Additionalday::class)
-                            ->whereIn('disfrutable_id', function ($query) use ($year) {
-                                $query->select('id')
-                                    ->from('additionaldays')
-                                    ->where('year', $year);
-                            })
-                            ->pluck('disfrutable_id')
-                            ->unique();
+                                ->where('disfrutable_type', Additionalday::class)
+                                ->whereIn('disfrutable_id', function ($query) use ($year) {
+                                    $query->select('id')
+                                        ->from('additionaldays')
+                                        ->where('year', $year);
+                                })
+                                ->pluck('disfrutable_id')
+                                ->unique();
 
-
-                        $protectedIds =  $protectedAdditionalDayIds;
-
+                        $protectedIds = $protectedAdditionalDayIds;
 
                         // 2️⃣ Borrado selectivo
 
@@ -150,15 +142,21 @@ class AddAdittionaldays extends Page implements HasForms, HasTable
                         // 3️⃣ Procesar Excel
                         foreach ($rows as $index => $row) {
 
-                            if ($index === 0) continue; // cabecera
+                            if ($index === 0) {
+                                continue;
+                            } // cabecera
 
                             [$codigo, $dias] = $row;
 
-                            if (! $codigo) continue;
+                            if (! $codigo) {
+                                continue;
+                            }
 
                             $user = User::where('codigo_agente', $codigo)->first();
 
-                            if (! $user) continue;
+                            if (! $user) {
+                                continue;
+                            }
 
                             $dias = (int) $dias;
 
@@ -174,14 +172,13 @@ class AddAdittionaldays extends Page implements HasForms, HasTable
                                 })
                                 ->count();
 
-
                             $diasFinal = max(0, $dias - $disfrutados);
 
                             // 5️⃣ Insertar registros
                             if ($diasFinal > 0) {
 
                                 Additionalday::insert(
-                                    collect(range(1, $diasFinal))->map(fn() => [
+                                    collect(range(1, $diasFinal))->map(fn () => [
                                         'user_id' => $user->id,
                                         'year' => $year,
                                         'created_at' => now(),
@@ -192,12 +189,11 @@ class AddAdittionaldays extends Page implements HasForms, HasTable
                         }
                     });
 
-
                     $protected = Additionalday::with('user')
                         ->whereIn('id', $protectedIds)
                         ->get();
 
-                    $report = $protected->map(function ($day) use ($year, $rows) {
+                    $report = $protected->map(function ($day) {
                         return [
                             'codigo_agente' => $day->user->codigo_agente ?? null,
 
@@ -205,15 +201,12 @@ class AddAdittionaldays extends Page implements HasForms, HasTable
 
                             'dia_disfrute' => $day->disfrute->fecha_disfrute->translatedFormat('d/M/Y'),
 
-
                         ];
                     });
-                    //guardar en cache
+                    // guardar en cache
                     $reportId = uniqid();
 
                     cache()->put("report_$reportId", $report, now()->addMinutes(10));
-
-
 
                     Notification::make()
                         ->title(__('Importación completada'))
@@ -221,14 +214,14 @@ class AddAdittionaldays extends Page implements HasForms, HasTable
                         ->body(
                             count($protected) > 0
                                 ? __('Alguno de los dias adicionales no se han eliminado por estar ya concedidos al agente')
-                                . ':<br><strong>' . $report->pluck('name')->unique()
-                                ->map(fn($name) => ucwords(str_replace('_', ' ', $name)))
-                                ->implode('</strong><br><strong>') .
+                                .':<br><strong>'.$report->pluck('name')->unique()
+                                    ->map(fn ($name) => ucwords(str_replace('_', ' ', $name)))
+                                    ->implode('</strong><br><strong>').
                                 '</strong><br>'
                                 : __('Importación completada sin incidencias')
                         )
                         ->actions([
-                            //fn () => $this->exportNoEliminados($report->toArray())
+                            // fn () => $this->exportNoEliminados($report->toArray())
                             Action::make('excel_export')
                                 ->button()
                                 ->icon('fas-file-export')
@@ -237,28 +230,26 @@ class AddAdittionaldays extends Page implements HasForms, HasTable
                                 ->url(url("/export-no-eliminados/{$reportId}/{$year}/{$rowsCount}"))
                                 ->openUrlInNewTab()
 
-
-
                                 ->color('primary'),
 
                         ])
                         ->success()
                         ->send();
-                })
+                }),
 
         ];
     }
 
-private function isRowEmpty(array $row): bool
-{
-    foreach ($row as $cell) {
-        if (trim((string) $cell) !== '') {
-            return false;
+    private function isRowEmpty(array $row): bool
+    {
+        foreach ($row as $cell) {
+            if (trim((string) $cell) !== '') {
+                return false;
+            }
         }
-    }
-    return true;
-}
 
+        return true;
+    }
 
     public static function table(Table $table): Table
     {
@@ -284,11 +275,12 @@ private function isRowEmpty(array $row): bool
                     ->label(__('Roles'))
                     ->getStateUsing(function ($record) {
                         $roles_user = $record->roles;
+
                         return $roles_user
                             ->pluck('name')
 
                             ->unique()
-                            ->map(fn($name) => ucwords(str_replace('_', ' ', $name)))
+                            ->map(fn ($name) => ucwords(str_replace('_', ' ', $name)))
                             ->implode(', ');
                     })
                     ->badge()
@@ -303,8 +295,6 @@ private function isRowEmpty(array $row): bool
 
                     ->step('1')
 
-
-
                     ->getStateUsing(function ($record, $livewire) {
 
                         $year = $livewire->tableFilters['year']['value'] ?: now()->year;
@@ -314,9 +304,7 @@ private function isRowEmpty(array $row): bool
                             ->count();
                     })
 
-
                     ->updateStateUsing(function ($record, $state, $livewire) {
-
 
                         $year = $livewire->tableFilters['year']['value'] ?: now()->year;
 
@@ -329,7 +317,7 @@ private function isRowEmpty(array $row): bool
 
                         if ($newCount > $currentCount) {
                             Additionalday::insert(
-                                collect(range(1, $newCount - $currentCount))->map(fn() => [
+                                collect(range(1, $newCount - $currentCount))->map(fn () => [
                                     'user_id' => $record->id,
                                     'year' => $year,
                                     'created_at' => now(),
@@ -343,13 +331,11 @@ private function isRowEmpty(array $row): bool
                         }
 
                         return $newCount;
-                    })
-
+                    }),
 
             ])
             ->recordActions([])
             ->filters([
-
 
                 SelectFilter::make('year')
                     ->label(__('Año'))
@@ -359,6 +345,7 @@ private function isRowEmpty(array $row): bool
                     ->placeholder(__('Selecciona un año'))
                     ->options(function () {
                         $currentYear = date('Y');
+
                         return [
                             $currentYear - 2 => $currentYear - 2,
                             $currentYear - 1 => $currentYear - 1,
@@ -372,13 +359,10 @@ private function isRowEmpty(array $row): bool
                         // ✅ no hacemos nada -> no filtramos usuarios
                     }),
 
-
-
-
-                //crear un filtro para usuarios
+                // crear un filtro para usuarios
                 SelectFilter::make('id')
                     ->label(__('Usuario'))
-                    ->options(\App\Models\User::pluck('name', 'id'))
+                    ->options(User::pluck('name', 'id'))
                     ->searchable(),
 
             ]);

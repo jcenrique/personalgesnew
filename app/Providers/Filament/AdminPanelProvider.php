@@ -7,7 +7,7 @@ use App\Filament\Resources\AuditResource;
 use App\Models\Role;
 use Asmit\ResizedColumn\ResizedColumnPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-
+use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -17,15 +17,13 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Width;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Filament\Actions\Action;
-use Filament\Support\Icons\Heroicon;
-use Tapp\FilamentAuditing\FilamentAuditingPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -53,7 +51,7 @@ class AdminPanelProvider extends PanelProvider
             ->userMenuItems([
                 Action::make('App')
 
-                    ->url(fn(): string => '/')
+                    ->url(fn (): string => '/')
                     ->icon(Heroicon::Home),
                 // ...
             ])
@@ -66,11 +64,10 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
-                //Dashboard::class,
+                // Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-
 
                 // AccountWidget::class,
                 // FilamentInfoWidget::class,
@@ -98,13 +95,13 @@ class AdminPanelProvider extends PanelProvider
                     ->navigationGroup('Admin')
                     // string|Closure|null
                     ->navigationSort(10)
-                    //si no existe la tabla roles, devuelve 0 para evitar errores
+                    // si no existe la tabla roles, devuelve 0 para evitar errores
                     ->navigationBadge(function () {
-                        //si no existe la tabla roles, devuelve 0 para evitar errores
+                        // si no existe la tabla roles, devuelve 0 para evitar errores
                         if (Role::count()) {
                             return strval(Role::count());
                         } else {
-                            return "0";
+                            return '0';
                         }
                     })                      // string|Closure|null
                     ->navigationBadgeColor('success')
@@ -112,7 +109,7 @@ class AdminPanelProvider extends PanelProvider
                     ->gridColumns([
                         'default' => 1,
                         'sm' => 2,
-                        'lg' => 3
+                        'lg' => 3,
                     ])
                     ->sectionColumnSpan(1)
                     ->checkboxListColumns([
@@ -126,7 +123,6 @@ class AdminPanelProvider extends PanelProvider
                     ]),
 
                 ResizedColumnPlugin::make(),
-
 
             ])
             ->authMiddleware([

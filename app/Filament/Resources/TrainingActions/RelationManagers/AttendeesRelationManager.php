@@ -2,19 +2,16 @@
 
 namespace App\Filament\Resources\TrainingActions\RelationManagers;
 
-use App\Models\User;
 use Asmit\ResizedColumn\HasResizableColumn;
-use Filament\Actions\Action;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
-use Filament\Forms\Components\Select;
-use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 use Override;
 
 class AttendeesRelationManager extends RelationManager
@@ -35,7 +32,6 @@ class AttendeesRelationManager extends RelationManager
     {
         return $table
 
-
             ->columns([
                 TextColumn::make('name')
                     ->label(__('Nombre'))
@@ -53,6 +49,7 @@ class AttendeesRelationManager extends RelationManager
                     ->getStateUsing(function ($record) {
 
                         $roles_user = $record->roles;
+
                         return $roles_user
                             ->pluck('name')
 
@@ -60,9 +57,6 @@ class AttendeesRelationManager extends RelationManager
                             ->map(fn($name) => ucwords(str_replace('_', ' ', $name)))
                             ->implode(', ');
                     }),
-                TextColumn::make('pivot.certificate_path')
-                    ->label(__('Certificado'))
-                    ->limit(40),
             ])
             ->headerActions([
                 AttachAction::make('add_attendees')
@@ -72,10 +66,9 @@ class AttendeesRelationManager extends RelationManager
                     ->multiple()
                     ->preloadRecordSelect(true)
                     ->recordSelectSearchColumns(['name', 'email'])
-                    ->recordSelectOptionsQuery(function (\Illuminate\Database\Eloquent\Builder $query) {
+                    ->recordSelectOptionsQuery(function (Builder $query) {
                         $trainingAction = $this->getOwnerRecord();
                         $course = $trainingAction->course;
-
 
                         $renewalLimit = now()->subYears($course->renewal_years);
 
@@ -83,20 +76,13 @@ class AttendeesRelationManager extends RelationManager
                             ->whereHas('roles', function ($q) use ($course) {
 
                                 $q->whereHas('courses', fn($qq) => $qq->where('courses.id', $course->id));
-
                             })
                             ->whereDoesntHave('trainingActions', function ($q) use ($course, $renewalLimit) {
 
                                 $q->where('course_id', $course->id)
-                                     ->where('end_date', '>=', $renewalLimit);
+                                    ->where('end_date', '>=', $renewalLimit);
                             });
-
                     }),
-
-
-
-
-
 
             ])
             ->recordActions([

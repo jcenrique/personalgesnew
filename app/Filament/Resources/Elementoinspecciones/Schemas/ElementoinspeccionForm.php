@@ -22,9 +22,9 @@ class ElementoinspeccionForm
                         //  ->relationship('categoria' , 'castellano')
                         ->relationship(
                             name: 'categoria',
-                            modifyQueryUsing: fn(Builder $query) => $query->orderBy('nombre_es'),
+                            modifyQueryUsing: fn (Builder $query) => $query->orderBy('nombre_es'),
                         )
-                        ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->nombre_es} / {$record->nombre_eu}"),
+                        ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->nombre_es} / {$record->nombre_eu}"),
                     Toggle::make('active')
                         ->label(__('Activo'))
                         ->inline(false)
@@ -41,7 +41,6 @@ class ElementoinspeccionForm
 
                         ->required(),
                 ]),
-
 
             ]);
     }

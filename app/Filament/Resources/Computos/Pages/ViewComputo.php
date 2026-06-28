@@ -18,6 +18,4 @@ class ViewComputo extends ViewRecord
             EditAction::make(),
         ];
     }
-
-
 }

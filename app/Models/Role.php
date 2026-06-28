@@ -12,5 +12,4 @@ class Role extends SpatieRole
     {
         return $this->belongsToMany(Course::class, 'course_role');
     }
-
 }

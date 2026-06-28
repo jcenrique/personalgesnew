@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
-use App\Models\Role;
 use App\Models\Zona;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DateTimePicker;
@@ -23,7 +22,7 @@ class UserForm
             ->components([
                 TextInput::make('name')
                     ->label(__('Name'))
-                    //no editable
+                    // no editable
                     ->disabled(true),
 
                 TextInput::make('email')
@@ -42,7 +41,6 @@ class UserForm
                     ->multiple()
                     ->preload()
                     ->searchable(),
-
 
                 DateTimePicker::make('email_verified_at')
                     ->label(__('Email Verified At'))
@@ -67,13 +65,12 @@ class UserForm
 
                     ->required(),
 
-
                 Select::make('residencias')
                     ->relationship('residencias', 'name')
                     ->multiple()
                     ->reactive()
                     ->searchable()
-                    //si se ha elegido la residencia marcar la zona a la que pertenece esa residencia
+                    // si se ha elegido la residencia marcar la zona a la que pertenece esa residencia
                     ->afterStateUpdated(function (callable $set, $state) {
                         if (count($state) > 0) {
                             $zona_id = Zona::whereHas('residencias', function (Builder $query) use ($state) {
@@ -84,9 +81,9 @@ class UserForm
                     })
                     ->required()
                     ->preload(),
-                //nuevo campo de status boolean activo o inactivo
+                // nuevo campo de status boolean activo o inactivo
                 Toggle::make('status')
-                    ->label(fn(Get $get) => $get('status') ? 'Activo' : 'Inactivo')
+                    ->label(fn (Get $get) => $get('status') ? 'Activo' : 'Inactivo')
                     ->reactive()
                     ->onColor('success')
                     ->offColor('danger')
@@ -95,7 +92,7 @@ class UserForm
                     ->offIcon(Heroicon::UserMinus)
                     ->required(),
                 Toggle::make('notify')
-                    ->label(fn(Get $get) => $get('notify') ? 'Notify: ON' : 'Notify: OFF')
+                    ->label(fn (Get $get) => $get('notify') ? 'Notify: ON' : 'Notify: OFF')
                     ->reactive()
                     ->onColor('success')
                     ->offColor('danger')
@@ -109,14 +106,10 @@ class UserForm
                     ->relationship('zonas', 'nombre')
 
                     ->options(
-                        fn() => Auth::user()->hasRole('super_admin')
+                        fn () => Auth::user()->hasRole('super_admin')
                             ? Zona::pluck('name', 'id')
                             : Auth::user()->zonas->pluck('name', 'id')
-                    )
-
-                    ,
-
-
+                    ),
 
             ]);
     }

@@ -4,26 +4,27 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
-
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use LdapRecord\Laravel\Auth\AuthenticatesWithLdap;
-
 use LdapRecord\Laravel\Auth\LdapAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements FilamentUser, MustVerifyEmail,  LdapAuthenticatable
+class User extends Authenticatable implements FilamentUser, LdapAuthenticatable, MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    use AuthenticatesWithLdap;
+
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
-    use HasRoles;
-    use AuthenticatesWithLdap; // <--- ESTO ES LO QUE FALTA
+    use HasRoles; // <--- ESTO ES LO QUE FALTA
+
     /**
      * The attributes that are mass assignable.
      *
@@ -40,6 +41,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail,  Ld
         'codigo_agente',
         'notify',
     ];
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -50,11 +52,9 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail,  Ld
         'remember_token',
     ];
 
-
     protected $casts = [
         'notify' => 'boolean',
     ];
-
 
     public function scopeNotifiable($query)
     {
@@ -66,6 +66,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail,  Ld
     {
         return 'email';
     }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -76,15 +77,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail,  Ld
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'status' => 'boolean'
+            'status' => 'boolean',
         ];
     }
 
-
-
     public function canAccessPanel(Panel $panel): bool
     {
-
 
         if ($panel->getId() === 'admin') {
             $is_admin = $this->roles()
@@ -94,18 +92,17 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail,  Ld
                     'admin',
 
                 ]));
+
             return $is_admin;
         }
         // Si intenta entrar al panel de la app (u otros)
         if ($panel->getId() === 'app') {
 
-
-            return  true; // O cualquier otra validación que necesites
+            return true; // O cualquier otra validación que necesites
         }
 
         return true;
     }
-
 
     /* * Relación con el modelo Sabado */
 
@@ -120,7 +117,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail,  Ld
         return $this->hasMany(Additionalday::class);
     }
 
-     /* * Relación con el modelo Additionalday */
+    /* * Relación con el modelo Additionalday */
     public function companydays()
     {
         return $this->hasMany(Additionalday::class);
@@ -138,16 +135,14 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail,  Ld
         return $this->hasMany(Reconocimiento::class);
     }
 
-
     public function disfrutes()
     {
-        return $this->hasMany(\App\Models\Disfrute::class);
+        return $this->hasMany(Disfrute::class);
     }
-
 
     public function rechazos()
     {
-        return $this->hasMany(\App\Models\Rechazo::class);
+        return $this->hasMany(Rechazo::class);
     }
 
     /* * Relación con el modelo Computo */
@@ -166,24 +161,20 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail,  Ld
         return $this->belongsToMany(Inspeccion::class);
     }
 
-
     public function tecnico()
     {
         return $this->belongsToMany(Inspeccion::class);
     }
-
 
     public function zonas(): BelongsToMany
     {
         return $this->belongsToMany(Zona::class);
     }
 
-
-
     public function trainingActions()
     {
         return $this->belongsToMany(TrainingAction::class, 'training_action_user')
-            ->withPivot(['attended',  'certificate_path'])
+            ->withPivot(['attended'])
             ->withTimestamps();
     }
 

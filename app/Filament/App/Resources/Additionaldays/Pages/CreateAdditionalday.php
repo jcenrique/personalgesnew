@@ -8,6 +8,4 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateAdditionalday extends CreateRecord
 {
     protected static string $resource = AdditionaldayResource::class;
-
-
 }

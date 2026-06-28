@@ -10,17 +10,12 @@ use App\Models\Disfrute;
 use App\Models\Sabado;
 use BackedEnum;
 use Carbon\Carbon;
-
 use Filament\Actions\BulkActionGroup;
-
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
-
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Enums\RecordActionsPosition;
-
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -34,7 +29,7 @@ class SabadoResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'sabado_trabajado';
 
-      //establecer el orden en el menu
+    // establecer el orden en el menu
     protected static ?int $navigationSort = 10;
 
     public static function getNavigationGroup(): string|UnitEnum|null
@@ -42,41 +37,41 @@ class SabadoResource extends Resource
         return __('Gestión');
     }
 
-    //funciones de etiquetas singular y plural para el recurso
+    // funciones de etiquetas singular y plural para el recurso
     public static function getLabel(): string
     {
         return __('Sábado');
     }
+
     public static function getPluralLabel(): string
     {
         return __('Sábados');
     }
 
-        // funcion para que aparezca el badge del numero de sabados disponibles
+    // funcion para que aparezca el badge del numero de sabados disponibles
     public static function getNavigationBadge(): ?string
     {
 
-        //obtener los dias adicionales del usuario para el año actual
-            $sabados_totales = Sabado::where('user_id', Auth::id())
-                    ->count();
+        // obtener los dias adicionales del usuario para el año actual
+        $sabados_totales = Sabado::where('user_id', Auth::id())
+            ->count();
 
-        //contar los días adicionales  se han solicitado disfrutar
-            $sabados_disfrutados= Disfrute::where('disfrutable_type', Sabado::class)
-                    ->where('user_id', Auth::id())
-                    ->where('status', StatusSolicitudes::Aprobado )->count();
+        // contar los días adicionales  se han solicitado disfrutar
+        $sabados_disfrutados = Disfrute::where('disfrutable_type', Sabado::class)
+            ->where('user_id', Auth::id())
+            ->where('status', StatusSolicitudes::Aprobado)->count();
 
-            $sabados_disponibles = $sabados_totales-$sabados_disfrutados;
+        $sabados_disponibles = $sabados_totales - $sabados_disfrutados;
 
-
-
-
-        return  $sabados_disponibles;
+        return $sabados_disponibles;
     }
-    //badge color para el numero de usuarios
+
+    // badge color para el numero de usuarios
     public static function getNavigationBadgeColor(): ?string
     {
         return 'success';
     }
+
     public static function getNavigationBadgeTooltip(): ?string
     {
         return __('Número de sábados totales disponibles');
@@ -91,87 +86,74 @@ class SabadoResource extends Resource
     public static function table(Table $table): Table
     {
 
-
-
         return $table
             ->recordTitleAttribute('sabado_trabajado')
-           ->poll(function ($livewire) {
-
+            ->poll(function ($livewire) {
 
                 $livewire->dispatch('refresh-sidebar');
+
                 return '10s';
             })
-             ->defaultSort('sabado_trabajado', 'asc')
+            ->defaultSort('sabado_trabajado', 'asc')
             ->columns([
-                TextColumn::make('sabado_trabajado')
+               TextColumn::make('sabado_trabajado')
 
-                    ->label(__('Sábado trabajado'))
-                    ->date('d F Y')
-                    ->color('info')
-                    ->sortable(),
+                   ->label(__('Sábado trabajado'))
+                   ->date('d F Y')
+                   ->color('info')
+                   ->sortable(),
 
-                TextColumn::make('disfrute.status')
-                    ->label(__('Estado'))
-                    ->default(StatusSolicitudes::Disponible)
-                    ->badge(),
+               TextColumn::make('disfrute.status')
+                   ->label(__('Estado'))
+                   ->default(StatusSolicitudes::Disponible)
+                   ->badge(),
 
-                TextColumn::make('disfrute.fecha_disfrute')
-                    ->label(__('Fecha de disfrute'))
-                      ->placeholder(StatusSolicitudes::Disponible->getLabel())
-                    //cambiar el color  si la fecha disfrute está pasada
-                    ->color(function ($record) {
-                        if ($record->disfrute?->fecha_disfrute) {
-                            return Carbon::parse($record->disfrute->fecha_disfrute)->isPast() ? 'gray' : 'success';
-                        }
-                        return null;
-                    })
-                   // ->color('success')
-                    ->weight(FontWeight::ExtraBold)
+               TextColumn::make('disfrute.fecha_disfrute')
+                   ->label(__('Fecha de disfrute'))
+                   ->placeholder(StatusSolicitudes::Disponible->getLabel())
+                   // cambiar el color  si la fecha disfrute está pasada
+                   ->color(function ($record) {
+                       if ($record->disfrute?->fecha_disfrute) {
+                           return Carbon::parse($record->disfrute->fecha_disfrute)->isPast() ? 'gray' : 'success';
+                       }
 
-                    //hacer visible esta columna solo cuando el estado sea "aprobado" o "disponible" o estemos en la pestaña de todas las solicitudes (porque ahí también se pueden
+                       return null;
+                   })
+                  // ->color('success')
+                   ->weight(FontWeight::ExtraBold)
 
+                   // hacer visible esta columna solo cuando el estado sea "aprobado" o "disponible" o estemos en la pestaña de todas las solicitudes (porque ahí también se pueden
 
-                    ->date('d F Y')
-                    ->sortable(),
-
-
+                   ->date('d F Y')
+                   ->sortable(),
 
             ])
             ->filters([
-                //TrashedFilter::make(),
-
-
+                // TrashedFilter::make(),
 
             ])
 
             ->recordActions([
                 SolicitarSabadoAction::make()
-                    //hacer visible esta acción solo cuando el estado sea "disponible"
-                     ->visible(
-                        function ($record, $livewire) {
+                   // hacer visible esta acción solo cuando el estado sea "disponible"
+                   ->visible(
+                       function ($record, $livewire) {
 
-
-                            return $record->disfrute == null && ($livewire->activeTab === 'available' || $livewire->activeTab === 'all') ;
-                        }
-                    )
+                           return $record->disfrute == null && ($livewire->activeTab === 'available' || $livewire->activeTab === 'all');
+                       }
+                   ),
 
             ])
-
 
             ->toolbarActions([
                 AnotarSabadoAction::make(),
 
                 BulkActionGroup::make([]),
             ])
-            //modificar query para que obtener solo records del usuario autenticado
+            // modificar query para que obtener solo records del usuario autenticado
             ->modifyQueryUsing(function ($query) {
                 $query->where('user_id', Auth::id());
-            })
-
-
-
-
-        ;
+            });
     }
 
     public static function getPages(): array

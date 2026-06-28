@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Users\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -22,23 +21,21 @@ class UsersTable
                     ->searchable(),
 
                 TextColumn::make('email')
-                ->wrapHeader()
+                    ->wrapHeader()
                     ->label(__('Email address'))
                     ->searchable(),
-
-
-
 
                 TextColumn::make('roles.name')
                     ->label(__('Roles'))
                     ->getStateUsing(function ($record) {
 
                         $roles_user = $record->roles;
+
                         return $roles_user
                             ->pluck('name')
 
                             ->unique()
-                            ->map(fn($name) => ucwords(str_replace('_', ' ', $name)))
+                            ->map(fn ($name) => ucwords(str_replace('_', ' ', $name)))
                             ->implode(', ');
                     })
                     ->badge()
@@ -72,7 +69,7 @@ class UsersTable
                         if ($state) {
                             return 'success';
                         } else {
-                            return  'danger';
+                            return 'danger';
                         }
                     })
                     ->formatStateUsing(function ($state) {
@@ -91,7 +88,7 @@ class UsersTable
                         if ($state) {
                             return 'success';
                         } else {
-                            return  'danger';
+                            return 'danger';
                         }
                     }),
                 TextColumn::make('created_at')

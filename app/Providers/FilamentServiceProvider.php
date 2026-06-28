@@ -7,11 +7,11 @@ use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Filament\Facades\Filament;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
+use Filament\Support\View\Components\ModalComponent;
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use Filament\Support\View\Components\ModalComponent;
-use Filament\Tables\Table;
 
 class FilamentServiceProvider extends ServiceProvider
 {
@@ -62,7 +62,7 @@ class FilamentServiceProvider extends ServiceProvider
 
         FilamentColor::register([
             'fuchsia' => Color::Fuchsia,
-            'yellow' =>Color::Yellow,
+            'yellow' => Color::Yellow,
             'indigo' => Color::Indigo,
             'cyan' => Color::Cyan,
         ]);
@@ -73,12 +73,11 @@ class FilamentServiceProvider extends ServiceProvider
                 ->striped()
                 ->poll(function ($livewire) {
                     $livewire->dispatch('refresh-sidebar');
+
                     return '10s';
                 })
                 ->paginationPageOptions([10, 25, 50]);
         });
-
-
 
     }
 }

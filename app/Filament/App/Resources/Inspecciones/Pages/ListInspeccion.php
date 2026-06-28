@@ -20,12 +20,11 @@ class ListInspeccion extends ListRecords
 
     protected static string $resource = InspeccionesResource::class;
 
-     protected function getHeaderActions(): array
+    protected function getHeaderActions(): array
     {
         return [
             CreateAction::make()
                 ->createAnother(false),
-
 
             Action::make('pendientes')
                 ->label(__('Pendientes del cuatrimestre'))
@@ -38,8 +37,6 @@ class ListInspeccion extends ListRecords
                     // 1. Obtener filtros activos
                     $filtros = $this->getTableFiltersForm()->getState();
                     $cuatri = $filtros['cuatrimestre'] ?? null;
-
-
 
                     // 2. Si no hay cuatrimestre → usar el actual
                     if (! $cuatri || ! str_contains($cuatri['value'], '-')) {
@@ -56,17 +53,16 @@ class ListInspeccion extends ListRecords
                     ];
 
                     $inicio = $ranges[$num]['start'];
-                    $fin    = $ranges[$num]['end'];
+                    $fin = $ranges[$num]['end'];
 
                     // 4. Estaciones que SÍ tienen inspección en ese rango
-                    $estacionesConInspeccion = Inspeccion::where('type' , 'periodica')->whereBetween('fecha_hora', [$inicio, $fin])
+                    $estacionesConInspeccion = Inspeccion::where('type', 'periodica')->whereBetween('fecha_hora', [$inicio, $fin])
                         ->pluck('estacion_id')
                         ->unique();
 
                     // 5. Estaciones pendientes y que pertenecen a la zona del usuario logueado
-                     $ocupadas = Inspeccion::whereNotIn('id', $estacionesConInspeccion)->where('type', 'periodica')->whereBetween('fecha_hora', [$inicio, $fin])
-
-                            ->whereHas('estacion', function (Builder $query) {
+                    $ocupadas = Inspeccion::whereNotIn('id', $estacionesConInspeccion)->where('type', 'periodica')->whereBetween('fecha_hora', [$inicio, $fin])
+                        ->whereHas('estacion', function (Builder $query) {
                             $zonas_ids = User::find(Auth::id())->zonas()->pluck('zona_id')->toArray();
                             $query->whereIn('zona_id', $zonas_ids);
                         })
@@ -86,7 +82,7 @@ class ListInspeccion extends ListRecords
         ];
     }
 
-     public static function cuatrimestreActual(): array
+    public static function cuatrimestreActual(): array
     {
         $year = now()->year;
         $month = now()->month;

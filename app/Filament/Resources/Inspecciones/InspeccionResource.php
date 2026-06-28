@@ -16,8 +16,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-
-
 use UnitEnum;
 
 class InspeccionResource extends Resource
@@ -26,25 +24,21 @@ class InspeccionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ShieldCheck;
 
-
-
     protected static ?string $slug = 'inspecciones';
 
     protected static ?int $navigationSort = 21;
-
-
-
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
         return __('Registro Inspecciones');
     }
 
-    //funciones de etiquetas singular y plural para el recurso
+    // funciones de etiquetas singular y plural para el recurso
     public static function getLabel(): string
     {
         return __('Inspección');
     }
+
     public static function getPluralLabel(): string
     {
         return __('Inspecciones');
@@ -96,12 +90,11 @@ class InspeccionResource extends Resource
         return __('Número de inspecciones totales pendientes para el cuatrimestre actual');
     }
 
-    //badge color para el numero de usuarios
+    // badge color para el numero de usuarios
     public static function getNavigationBadgeColor(): ?string
     {
         return 'danger';
     }
-
 
     public static function form(Schema $schema): Schema
     {
@@ -116,7 +109,7 @@ class InspeccionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ResultadosRelationManager::class
+            ResultadosRelationManager::class,
         ];
     }
 
@@ -133,6 +126,7 @@ class InspeccionResource extends Resource
     {
         $user = auth()->user();
         $zonaIds = $user->zonas()->pluck('zonas.id');
+
         return parent::getEloquentQuery()
             ->whereHas('estacion', function (Builder $query) use ($zonaIds) {
                 $user = auth()->user();
@@ -141,7 +135,6 @@ class InspeccionResource extends Resource
                     ->toArray();
 
                 $query->whereIn('zona_id', $zonaIds);
-            })
-        ;
+            });
     }
 }

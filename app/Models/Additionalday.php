@@ -4,14 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Notifications\Notifiable;
 use OwenIt\Auditing\Contracts\Auditable;
 
-class Additionalday extends Model  implements Auditable
+class Additionalday extends Model implements Auditable
 {
     use HasFactory, Notifiable;
-
     use \OwenIt\Auditing\Auditable;
 
     protected $fillable = [
@@ -38,18 +36,13 @@ class Additionalday extends Model  implements Auditable
         return $this->belongsTo(User::class);
     }
 
-
-
     public function disfrute()
     {
         return $this->morphOne(Disfrute::class, 'disfrutable');
     }
 
-
     public function rechazos()
     {
         return $this->morphMany(Rechazo::class, 'rechazable');
     }
-
-
 }

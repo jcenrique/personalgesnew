@@ -15,15 +15,15 @@ class Elementoinspeccion extends Model
         'active',
 
     ];
+
     protected $casts = [
-        'active' => 'boolean'
+        'active' => 'boolean',
     ];
 
     public function categoria()
     {
         return $this->belongsTo(Categoriaelemento::class, 'categoriaelemento_id');
     }
-
 
     public function resultados()
     {

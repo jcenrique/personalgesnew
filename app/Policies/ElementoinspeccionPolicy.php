@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Elementoinspeccion;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class ElementoinspeccionPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Elementoinspeccion');
@@ -46,5 +46,4 @@ class ElementoinspeccionPolicy
     {
         return $authUser->can('DeleteAny:Elementoinspeccion');
     }
-
 }

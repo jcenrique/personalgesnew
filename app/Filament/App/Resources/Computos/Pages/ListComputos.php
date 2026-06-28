@@ -10,12 +10,13 @@ use Filament\Resources\Pages\ListRecords;
 class ListComputos extends ListRecords
 {
     use HasResizableColumn;
+
     protected static string $resource = ComputoResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            //CreateAction::make(),
+            // CreateAction::make(),
         ];
     }
 }

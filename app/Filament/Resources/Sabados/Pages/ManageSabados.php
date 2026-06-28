@@ -4,11 +4,9 @@ namespace App\Filament\Resources\Sabados\Pages;
 
 use App\Enum\StatusSolicitudes;
 use App\Filament\Resources\Sabados\SabadoResource;
-use App\Models\Sabado;
 use Asmit\ResizedColumn\HasResizableColumn;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRecords;
-
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,7 +14,8 @@ use Illuminate\Support\Facades\Auth;
 
 class ManageSabados extends ManageRecords
 {
-     use HasResizableColumn;
+    use HasResizableColumn;
+
     protected static string $resource = SabadoResource::class;
 
     protected function getHeaderActions(): array
@@ -40,12 +39,11 @@ class ManageSabados extends ManageRecords
                 ->badge(function ($livewire) {
                     $filterUserId = $livewire->getTable()->getFilters()['user_id']->getState()['value'] ?? null;
 
-                     $query = static::getResource()::getEloquentQuery();
+                    $query = static::getResource()::getEloquentQuery();
 
-                     if ($filterUserId) {
+                    if ($filterUserId) {
                         $query->where('user_id', $filterUserId);
                     }
-
 
                     $count = $query
                         ->doesntHave('disfrute')
@@ -64,25 +62,24 @@ class ManageSabados extends ManageRecords
                 ->badge(function ($livewire) {
                     $filterUserId = $livewire->getTable()->getFilters()['user_id']->getState()['value'] ?? null;
 
-
-                      $query =static::getResource()::getEloquentQuery();// Companyday::query();
+                    $query = static::getResource()::getEloquentQuery(); // Companyday::query();
                     if ($filterUserId) {
                         $query->where('user_id', $filterUserId);
                     }
 
-
                     $count = $query
                         ->whereHas('disfrute', function (Builder $query) {
-                            //dd($query->where('status', StatusSolicitudes::Solicitado));
+                            // dd($query->where('status', StatusSolicitudes::Solicitado));
                             $query->where('status', StatusSolicitudes::Solicitado);
                         })
                         ->get()->count();
-                          return $count > 0 ? $count : null;
+
+                    return $count > 0 ? $count : null;
                 })
                 ->modifyQueryUsing(function (Builder $query) {
 
                     $query->whereHas('disfrute', function (Builder $query) {
-                        //dd($query->where('status', StatusSolicitudes::Solicitado));
+                        // dd($query->where('status', StatusSolicitudes::Solicitado));
                         $query->where('status', StatusSolicitudes::Solicitado);
                     })
                         ->get();
@@ -91,16 +88,15 @@ class ManageSabados extends ManageRecords
                 ->badgeColor(StatusSolicitudes::Aprobado->getColor())
                 ->badge(function ($livewire) {
                     $filterUserId = $livewire->getTable()->getFilters()['user_id']->getState()['value'] ?? null;
-                    //incluir el filtro de user_id en la consulta si no es null
+                    // incluir el filtro de user_id en la consulta si no es null
                     $query = static::getResource()::getEloquentQuery();
-                   if ($filterUserId) {
+                    if ($filterUserId) {
                         $query->where('user_id', $filterUserId);
                     }
 
-
                     $count = $query
                         ->whereHas('disfrute', function (Builder $query) {
-                            //dd($query->where('status', StatusSolicitudes::Solicitado));
+                            // dd($query->where('status', StatusSolicitudes::Solicitado));
                             $query->where('status', StatusSolicitudes::Aprobado);
                         })
                         ->get()->count();
@@ -110,38 +106,32 @@ class ManageSabados extends ManageRecords
                 ->modifyQueryUsing(function (Builder $query) {
                     $query
                         ->whereHas('disfrute', function (Builder $query) {
-                            //dd($query->where('status', StatusSolicitudes::Solicitado));
+                            // dd($query->where('status', StatusSolicitudes::Solicitado));
                             $query->where('status', StatusSolicitudes::Aprobado);
                         })
                         ->get();
                 }),
-
-
 
             'all' => Tab::make()->label(__('Todos'))
                 ->icon(Heroicon::Square3Stack3d)
                 ->badgeColor('primary')
                 ->badge(function ($livewire) {
                     $filterUserId = $livewire->getTable()->getFilters()['user_id']->getState()['value'] ?? null;
-                    //incluir el filtro de user_id en la consulta si no es null
+                    // incluir el filtro de user_id en la consulta si no es null
                     $query = static::getResource()::getEloquentQuery();
                     if ($filterUserId) {
                         $query->where('user_id', $filterUserId);
                     }
                     $count = $query->get()->count();
 
-
                     return $count > 0 ? $count : null;
                 })
-                ->modifyQueryUsing(function ($query) {
-                    $query;
-                }),
-
+                ->modifyQueryUsing(function ($query) {}),
 
         ];
     }
 
-    public function getDefaultActiveTab(): string | int | null
+    public function getDefaultActiveTab(): string|int|null
     {
         return 'available';
     }

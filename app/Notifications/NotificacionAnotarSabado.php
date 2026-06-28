@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use App\Models\Sabado;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -47,8 +46,8 @@ class NotificacionAnotarSabado extends Notification
             ->action(__('Ver sabado'), url('/admin/sabados/?tab=available'))
             ->line(__('Gracias por usar nuestra aplicación!'))
             ->markdown('vendor.notifications.email', [
-            'notifiable' => $notifiable,
-        ]);
+                'notifiable' => $notifiable,
+            ]);
     }
 
     /**

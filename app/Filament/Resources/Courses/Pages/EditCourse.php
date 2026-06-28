@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Courses\Pages;
 
 use App\Filament\Resources\Courses\CourseResource;
 use App\Filament\Resources\TrainingActions\TrainingActionResource;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -40,16 +41,16 @@ class EditCourse extends EditRecord
                             ->where('course_id', $record->id)
                             ->max('end_date');
 
-                        if (!$lastActionEndDate) {
+                        if (! $lastActionEndDate) {
                             return false;
                         }
 
-                        if (!$record->requires_renewal) {
+                        if (! $record->requires_renewal) {
                             return true;
                         }
 
                         // Si requiere renovación, verificar si no ha vencido (basado en fecha de fin de la última acción)
-                        return now()->diffInYears(\Carbon\Carbon::parse($lastActionEndDate)) < $record->renewal_years;
+                        return now()->diffInYears(Carbon::parse($lastActionEndDate)) < $record->renewal_years;
                     })->sortBy(function ($user) {
                         return $user->roles->sortBy('name')->first()->name ?? '';
                     });
@@ -75,16 +76,16 @@ class EditCourse extends EditRecord
                             ->where('course_id', $record->id)
                             ->max('end_date');
 
-                        if (!$lastActionEndDate) {
+                        if (! $lastActionEndDate) {
                             return false;
                         }
 
-                        if (!$record->requires_renewal) {
+                        if (! $record->requires_renewal) {
                             return true;
                         }
 
                         // Si requiere renovación, verificar si no ha vencido (basado en fecha de fin de la última acción)
-                        return now()->diffInYears(\Carbon\Carbon::parse($lastActionEndDate)) < $record->renewal_years;
+                        return now()->diffInYears(Carbon::parse($lastActionEndDate)) < $record->renewal_years;
                     });
 
                     // Pendientes: todos los requeridos menos los confirmados

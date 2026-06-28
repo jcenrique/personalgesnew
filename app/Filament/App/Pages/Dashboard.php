@@ -11,21 +11,16 @@ class Dashboard extends PagesDashboard
 {
     use HasPageShield;
 
-
-
-
-   protected static string|BackedEnum|null $navigationIcon = Heroicon::Home;
-
-
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Home;
 
     protected static ?int $navigationSort = 1;
-
 
     public static function getNavigationLabel(): string
     {
         return __('Inicio');
     }
-    public  function getTitle(): string
+
+    public function getTitle(): string
     {
         return '';
     }

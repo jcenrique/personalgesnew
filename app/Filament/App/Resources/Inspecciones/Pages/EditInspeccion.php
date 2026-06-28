@@ -11,7 +11,7 @@ class EditInspeccion extends EditRecord
 {
     protected static string $resource = InspeccionesResource::class;
 
-      protected function getHeaderActions(): array
+    protected function getHeaderActions(): array
     {
         return [
             // DeleteAction::make(),
@@ -23,7 +23,7 @@ class EditInspeccion extends EditRecord
                 ->hiddenLabel(true)
                 ->tooltip('Descargar PDF')
                 ->icon('heroicon-o-arrow-down-tray')
-                ->url(fn($record) => route('inspecciones.export-pdf', ['inspeccion' => $record]))
+                ->url(fn ($record) => route('inspecciones.export-pdf', ['inspeccion' => $record]))
                 ->openUrlInNewTab(),
 
             Action::make('pdf')
@@ -34,21 +34,19 @@ class EditInspeccion extends EditRecord
                 ->hiddenLabel(true)
                 ->tooltip('Descargar PDF inspección especial')
                 ->icon('heroicon-o-document-arrow-down')
-                ->url(fn($record) => route('inspecciones.export-especial-pdf', ['inspeccion' => $record]))
+                ->url(fn ($record) => route('inspecciones.export-especial-pdf', ['inspeccion' => $record]))
                 ->openUrlInNewTab(),
         ];
     }
 
-
     protected function mutateFormDataBeforeSave(array $data): array
     {
-
 
         //
         if (
             $data['type'] === 'especial'
-            && (!empty($data['user_id_1'])
-                || !empty($data['user_id_2']))
+            && (! empty($data['user_id_1'])
+                || ! empty($data['user_id_2']))
         ) {
 
             return $data;
@@ -64,11 +62,10 @@ class EditInspeccion extends EditRecord
             $this->halt();
         }
 
-
         if (
             $data['type'] === 'periodica'
-            && (!empty($data['user_id_1'])
-                && !empty($data['user_id_2']))
+            && (! empty($data['user_id_1'])
+                && ! empty($data['user_id_2']))
         ) {
 
             return $data;
@@ -84,7 +81,6 @@ class EditInspeccion extends EditRecord
 
             $this->halt();
         }
-
 
         return $data;
     }

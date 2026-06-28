@@ -8,11 +8,10 @@ use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\Width;
 
-use function PHPUnit\Framework\assertFalse;
-
 class ListCategoriaelementos extends ListRecords
 {
     use HasResizableColumn;
+
     protected static string $resource = CategoriaelementoResource::class;
 
     protected function getHeaderActions(): array

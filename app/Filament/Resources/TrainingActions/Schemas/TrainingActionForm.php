@@ -6,16 +6,14 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
-use Hamcrest\Core\Set;
 
 class TrainingActionForm
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            //->columns(4)
+            // ->columns(4)
 
             ->components([
                 TextInput::make('company_name')
@@ -32,14 +30,14 @@ class TrainingActionForm
                     ->label(__('Tipo de acción'))
                     ->options([
                         'interna' => __('Interna'),
-                        'externa' => __('Externa')
+                        'externa' => __('Externa'),
                     ])
                     ->required(),
                 Select::make('mode')
                     ->label(__('Modalidad'))
                     ->options([
                         'presencial' => __('Presencial'),
-                        'online' => __('On Line')
+                        'online' => __('On Line'),
                     ])
                     ->required(),
                 TextInput::make('location')
@@ -57,9 +55,9 @@ class TrainingActionForm
                     ->closeOnDateSelection()
                     ->after('2020-01-01')
                     ->reactive()
-                    ->afterStateUpdated(function($state , callable  $set ){
+                    ->afterStateUpdated(function ($state, callable $set) {
 
-                    $set('end_date', $state);
+                        $set('end_date', $state);
                     })
                     ->required(),
                 DatePicker::make('end_date')

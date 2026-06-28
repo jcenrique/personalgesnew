@@ -22,17 +22,20 @@ class CourseResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 
     protected static ?string $recordTitleAttribute = 'name';
+
     protected static ?int $navigationSort = 50;
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
         return __('Formación');
     }
-     //funciones de etiquetas singular y plural para el recurso
+
+    // funciones de etiquetas singular y plural para el recurso
     public static function getLabel(): string
     {
         return __('Curso');
     }
+
     public static function getPluralLabel(): string
     {
         return __('Cursos');
@@ -41,16 +44,17 @@ class CourseResource extends Resource
     // funcion para que aparezca el badge del numero de sabados disponibles
     public static function getNavigationBadge(): ?string
     {
-         $userId = Auth::id();
+        $userId = Auth::id();
 
-                $total_cursos =Course::whereHas('trainingActions.users', function ($q) use ($userId) {
-                    $q->where('users.id', $userId);
-                })->count();
-      //  $total_cursos = Course::count();
+        $total_cursos = Course::whereHas('trainingActions.users', function ($q) use ($userId) {
+            $q->where('users.id', $userId);
+        })->count();
+        //  $total_cursos = Course::count();
 
-        return  $total_cursos;
+        return $total_cursos;
     }
-    //badge color para el numero de usuarios
+
+    // badge color para el numero de usuarios
     public static function getNavigationBadgeColor(): ?string
     {
         return 'success';
@@ -77,17 +81,17 @@ class CourseResource extends Resource
     {
         return [
             'index' => ListCourses::route('/'),
-            //'create' => CreateCourse::route('/create'),
-           // 'edit' => EditCourse::route('/{record}/edit'),
+            // 'create' => CreateCourse::route('/create'),
+            // 'edit' => EditCourse::route('/{record}/edit'),
         ];
     }
 
     public static function getEloquentQuery(): Builder
-{
-    $userId = Auth::id();
+    {
+        $userId = Auth::id();
 
-    return parent::getEloquentQuery()->whereHas('trainingActions.users', function ($q) use ($userId) {
-                    $q->where('users.id', $userId);
-                });
-}
+        return parent::getEloquentQuery()->whereHas('trainingActions.users', function ($q) use ($userId) {
+            $q->where('users.id', $userId);
+        });
+    }
 }

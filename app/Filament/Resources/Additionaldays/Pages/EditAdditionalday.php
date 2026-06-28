@@ -28,13 +28,12 @@ class EditAdditionalday extends EditRecord
         if ($this->record && $this->record->disfrute) {
             $data['disfrute']['fecha_disfrute'] = $this->record->disfrute->fecha_disfrute;
             $data['disfrute']['status'] = $this->record->disfrute->status;
-        } else if ($this->record && !$this->record->disfrute) {
+        } elseif ($this->record && ! $this->record->disfrute) {
             $data['disfrute']['status'] = StatusSolicitudes::Disponible;
         }
 
         return $data;
     }
-
 
     protected function afterSave(): void
     {

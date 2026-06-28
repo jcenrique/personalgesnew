@@ -3,13 +3,12 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class ReconocimientoPorCaducar extends Notification
 {
-   use Queueable;
+    use Queueable;
 
     public $usuarios;
 
@@ -35,15 +34,14 @@ class ReconocimientoPorCaducar extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
+            ->subject('Reconocimientos próximos a caducar')
+            ->line('Los siguientes usuarios tienen reconocimientos caducados o próximos a caducar:')
+            ->line($this->usuarios->pluck('name')->join(', '))
+            ->action('Ver reconocimientos', url('/admin/reconocimientos'))
+            ->markdown('vendor.notifications.email', [
+                'notifiable' => $notifiable,
+            ]);
 
-        ->subject('Reconocimientos próximos a caducar')
-        ->line('Los siguientes usuarios tienen reconocimientos caducados o próximos a caducar:')
-        ->line($this->usuarios->pluck('name')->join(', '))
-        ->action('Ver reconocimientos', url('/admin/reconocimientos'))
-        ->markdown('vendor.notifications.email', [
-            'notifiable' => $notifiable,
-        ]);
-;
     }
 
     /**

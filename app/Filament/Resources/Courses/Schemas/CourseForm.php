@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Courses\Schemas;
 
-use App\Models\Role;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -22,8 +21,7 @@ class CourseForm
                     ->maxLength(255),
                 TextInput::make('duration_hours')
                     ->label(__('Duración en horas'))
-                    ->numeric()
-                    ,
+                    ->numeric(),
 
                 Select::make('roles')
                     ->label(__('Roles obligatorios'))
@@ -34,24 +32,21 @@ class CourseForm
 
                     ->getOptionLabelFromRecordUsing(function ($record) {
                         return ucwords(str_replace('_', ' ', $record->name));
-                    })
-                   ,
+                    }),
 
                 Textarea::make('description')
                     ->label(__('Descripción del curso'))
                     ->columnSpan(2),
 
-
-
                 Toggle::make('requires_renewal')
-                 ->inline(false)
+                    ->inline(false)
                     ->label(__('Requiere renovación'))
                     ->reactive(),
 
                 TextInput::make('renewal_years')
                     ->label(__('Años para renovación'))
                     ->numeric()
-                    ->visible(fn($get) => $get('requires_renewal')),
+                    ->visible(fn ($get) => $get('requires_renewal')),
             ]);
     }
 }

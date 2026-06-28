@@ -9,6 +9,7 @@ use App\Models\Computo;
 use App\Models\Disfrute;
 use App\Models\Reconocimiento;
 use App\Models\Sabado;
+use Carbon\Carbon;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
@@ -19,28 +20,26 @@ use Filament\Support\Enums\TextSize;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\Widget;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\HtmlString;
 
 class ReconocimientoWidget extends Widget implements HasSchemas
-
 {
     use InteractsWithSchemas;
 
     protected ?string $pollingInterval = '20s';
 
-
     protected static ?int $sort = 0;
 
     protected string $view = 'filament.app.widgets.reconocimiento-widget';
 
-    protected int | string | array $columnSpan = [
+    protected int|string|array $columnSpan = [
         'md' => 2,
         'xl' => 3,
     ];
 
-    public function getColumns(): int | array
+    public function getColumns(): int|array
     {
         return 4;
     }
@@ -61,6 +60,7 @@ class ReconocimientoWidget extends Widget implements HasSchemas
                         if ($record) {
                             return Carbon::parse($record->fecha)->locale(App::getLocale())->translatedFormat('d M Y');
                         }
+
                         return __('No hay registros');
                     })
                     ->size(TextSize::Large)
@@ -99,7 +99,7 @@ class ReconocimientoWidget extends Widget implements HasSchemas
                     })
                     ->badge()
                     ->formatStateUsing(function ($state) {
-                        $min_disponibles  = Computo::where('user_id', Auth::id())->where('year', now()->year)->sum('disponible');
+                        $min_disponibles = Computo::where('user_id', Auth::id())->where('year', now()->year)->sum('disponible');
                         $min_solicitados = Computo::where('user_id', Auth::id())->where('year', now()->year)
                             ->withSum(['disfrutes as minutos_solicitados_sum' => function ($q) {
                                 $q->where('minutos_solicitados', '>', 0);
@@ -127,8 +127,6 @@ class ReconocimientoWidget extends Widget implements HasSchemas
 
         return $schema
 
-
-
             ->components([
 
                 TextEntry::make('disponibles')
@@ -141,38 +139,35 @@ class ReconocimientoWidget extends Widget implements HasSchemas
                     ->color(StatusSolicitudes::Disponible->getColor())
                     ->badge()
                     ->getStateUsing(function () {
-                        //obtener dias adicionales
+                        // obtener dias adicionales
                         $dias_adicionales_totales = Additionalday::where('user_id', Auth::id())
                             ->where('year', now()->year)->count();
 
-                        //contar los días adicionales  se han solicitado disfrutar
+                        // contar los días adicionales  se han solicitado disfrutar
                         $dias_adicionales_disfrutados = Disfrute::where('user_id', Auth::id())
                             ->where('disfrutable_type', Additionalday::class)
                             ->where('status', StatusSolicitudes::Aprobado)->count();
 
                         $dias_adicionales_disponibles = $dias_adicionales_totales - $dias_adicionales_disfrutados;
-                        $diasadicionales =  $dias_adicionales_disponibles;
+                        $diasadicionales = $dias_adicionales_disponibles;
 
-                        //obtener días pedidos por la empresa
+                        // obtener días pedidos por la empresa
 
                         $dias_totales = Companyday::where('user_id', Auth::id())->count();
 
-
-
-                        //contar los días adicionales  se han solicitado disfrutar
+                        // contar los días adicionales  se han solicitado disfrutar
                         $dias_disfrutados = Disfrute::where('user_id', Auth::id())->where('disfrutable_type', Companyday::class)
                             ->where('status', StatusSolicitudes::Aprobado)->count();
 
                         $dias_disponibles = $dias_totales - $dias_disfrutados;
                         $diaspedidosempresa = $dias_disponibles;
 
-
-                        //obtener sabados
-                        //obtener los dias adicionales del usuario para el año actual
+                        // obtener sabados
+                        // obtener los dias adicionales del usuario para el año actual
                         $sabados_totales = Sabado::where('user_id', Auth::id())
                             ->count();
 
-                        //contar los días adicionales  se han solicitado disfrutar
+                        // contar los días adicionales  se han solicitado disfrutar
                         $sabados_disfrutados = Disfrute::where('disfrutable_type', Sabado::class)
                             ->where('user_id', Auth::id())
                             ->where('status', StatusSolicitudes::Aprobado)->count();
@@ -191,7 +186,6 @@ class ReconocimientoWidget extends Widget implements HasSchemas
                     ->icon('fas-calendar-day')
                     ->fontFamily(FontFamily::Mono),
 
-
             ]);
     }
 
@@ -208,7 +202,7 @@ class ReconocimientoWidget extends Widget implements HasSchemas
                 //     ->label(__('Días de disfrute solicitados y aprobados'))
                 // ->hiddenLabel(true)
                 // ->inlineLabel()
-                //->description(__('Días de disfrute solicitados y aprobados'))
+                // ->description(__('Días de disfrute solicitados y aprobados'))
                 // ->components([
                 TextEntry::make('solicitados')
                     ->label(__('Dias solicitados'))
@@ -231,7 +225,7 @@ class ReconocimientoWidget extends Widget implements HasSchemas
                     ->fontFamily(FontFamily::Mono),
 
                 TextEntry::make('aprobados')
-                    ->label(__('Días pendientes de disfrutar'))
+                    ->label(new HtmlString('<span class="whitespace-nowrap">' . __('Días pendientes de disfrutar') . '</span>'))
                     ->tooltip(__('Días  solicitados y aprobados pendientes de disfrutar'))
                     //  ->inlineLabel()
                     ->maxWidth(Width::Full)
@@ -242,7 +236,6 @@ class ReconocimientoWidget extends Widget implements HasSchemas
 
                         return Disfrute::where('user_id', Auth::id())->where('fecha_disfrute', '>=', now())->where('status', 'aprobado')->count();
                     })
-
 
                     ->icon('fas-calendar-day')
                     ->fontFamily(FontFamily::Mono),

@@ -7,12 +7,11 @@ use Guava\Calendar\ValueObjects\CalendarEvent;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 
-class Disponibilidad extends Model  implements Auditable, Eventable
+class Disponibilidad extends Model implements Auditable, Eventable
 {
-
     use \OwenIt\Auditing\Auditable;
 
-    protected $table ='disponibilidades';
+    protected $table = 'disponibilidades';
 
     protected $fillable = [
         'user_id',
@@ -21,6 +20,7 @@ class Disponibilidad extends Model  implements Auditable, Eventable
         'razon',
 
     ];
+
     protected $casts = [
         'fecha' => 'date',
 
@@ -38,18 +38,15 @@ class Disponibilidad extends Model  implements Auditable, Eventable
         ];
 
         return CalendarEvent::make($this)
-            ->title(__('Disponibilidad') )
+            ->title(__('Disponibilidad'))
             ->styles($styles)
             ->allDay()
             ->start($this->fecha)
-            ->end($this->fecha)
-        ;
+            ->end($this->fecha);
     }
 
-
-     public function user()
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
-
 }

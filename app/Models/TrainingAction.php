@@ -1,18 +1,14 @@
 <?php
 
-
 namespace App\Models;
 
 use Guava\Calendar\Contracts\Eventable;
-
 use Guava\Calendar\ValueObjects\CalendarEvent;
-
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class TrainingAction extends Model implements Eventable
 {
-
     use HasFactory;
 
     protected $table = 'training_actions';
@@ -31,7 +27,7 @@ class TrainingAction extends Model implements Eventable
 
     protected $casts = [
         'start_date' => 'date',
-        'end_date'   => 'date',
+        'end_date' => 'date',
     ];
 
     // This is where you map your model into a calendar resource object
@@ -49,13 +45,9 @@ class TrainingAction extends Model implements Eventable
         return CalendarEvent::make($this)
             ->title(__('Curso') . ':' . $this->course->name)
             ->styles($styles)
-            ->allDay()
-            ->start($this->start_date)
-            ->end($this->end_date)
-
-
-
-        ;
+            ->allDay(false)
+            ->start(($this->start_date ?? now())->copy()->startOfDay())
+            ->end(($this->end_date ?? $this->start_date ?? now())->copy()->endOfDay());
     }
 
     /*
@@ -74,7 +66,7 @@ class TrainingAction extends Model implements Eventable
     public function attendees()
     {
         return $this->belongsToMany(User::class, 'training_action_user')
-            ->withPivot(['attended',  'certificate_path'])
+            ->withPivot(['attended'])
 
             ->withTimestamps()
             ->distinct();
@@ -89,7 +81,7 @@ class TrainingAction extends Model implements Eventable
     // Duración en días (útil para informes)
     public function getDurationDaysAttribute()
     {
-        if (!$this->end_date) {
+        if (! $this->end_date) {
             return 1;
         }
 
@@ -105,14 +97,14 @@ class TrainingAction extends Model implements Eventable
     // Saber si está en curso
     public function getIsOngoingAttribute()
     {
-        return $this->start_date->isPast() && (!$this->end_date || $this->end_date->isFuture());
+        return $this->start_date->isPast() && (! $this->end_date || $this->end_date->isFuture());
     }
 
     public function users()
     {
         return $this->belongsToMany(User::class, 'training_action_user')
             //  ->using(\App\Models\TrainingActionUser::class)
-            ->withPivot(['attended', 'certificate_path'])
+            ->withPivot(['attended'])
             ->withTimestamps();
     }
 }

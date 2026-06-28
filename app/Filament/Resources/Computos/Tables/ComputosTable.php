@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Computos\Tables;
 
 use App\Models\Disfrute;
 use App\Models\User;
-use Carbon\Carbon;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -18,8 +17,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
-
-use function Symfony\Component\Clock\now;
 
 class ComputosTable
 {
@@ -46,7 +43,8 @@ class ComputosTable
                             ->label(__('Total computos'))
                             ->formatStateUsing(function ($state) {
                                 $horas = intdiv($state, 60);
-                                $mins  = $state % 60;
+                                $mins = $state % 60;
+
                                 return sprintf('%02d:%02d', $horas, $mins);
                             })
                     )
@@ -56,7 +54,7 @@ class ComputosTable
 
                         $horas = intdiv($minutos, 60);
 
-                        $mins  = $minutos % 60;
+                        $mins = $minutos % 60;
 
                         return sprintf('%02d:%02d', $horas, $mins);
                     }),
@@ -72,15 +70,14 @@ class ComputosTable
 
                             $horas = intdiv($minutos, 60);
 
-                            $mins  = $minutos % 60;
+                            $mins = $minutos % 60;
 
                             return sprintf('%02d:%02d', $horas, $mins);
                         }
 
-
                         $horas = 0;
 
-                        $mins  = 0;
+                        $mins = 0;
 
                         return sprintf('%02d:%02d', $horas, $mins);
                     })
@@ -90,22 +87,21 @@ class ComputosTable
                             ->extraAttributes(['class' => 'text-red-600'])
                             ->formatStateUsing(function ($state) {
                                 $horas = intdiv($state, 60);
-                                $mins  = $state % 60;
+                                $mins = $state % 60;
+
                                 return sprintf('%02d:%02d', $horas, $mins);
                             })
                     ),
-
-
 
                 TextColumn::make('pendientes')
                     ->label(__('Disponible'))
                     ->color(function ($record) {
                         $minutos_computo = $record->disponible;
                         $minutos_disfrutados = $record->disfrutes()->sum('minutos_solicitados');
-                       $restantes = $minutos_computo - $minutos_disfrutados;
-                        if($restantes<0){
+                        $restantes = $minutos_computo - $minutos_disfrutados;
+                        if ($restantes < 0) {
                             return 'danger';
-                        } elseif($restantes>0){
+                        } elseif ($restantes > 0) {
                             return 'success';
                         } else {
                             return 'warning';
@@ -114,19 +110,20 @@ class ComputosTable
                     ->state(function ($record) {
                         $minutos_computo = $record->disponible;
                         $minutos_disfrutados = $record->disfrutes()->sum('minutos_solicitados');
+
                         return $minutos_computo - $minutos_disfrutados;
                     })
                     ->formatStateUsing(function ($state) {
-                         //si el total es negativo, mostrar mostrar el valor con signo negativo delante y el valor absoluto del tiempo, para evitar confusiones al mostrar tiempos negativos
-                         if ($state < 0) {
-                            $horas =abs( intdiv($state, 60));
+                        // si el total es negativo, mostrar mostrar el valor con signo negativo delante y el valor absoluto del tiempo, para evitar confusiones al mostrar tiempos negativos
+                        if ($state < 0) {
+                            $horas = abs(intdiv($state, 60));
                             $mins = abs($state % 60);
-                            return '-' . sprintf('%02d:%02d', $horas, $mins);
+
+                            return '-'.sprintf('%02d:%02d', $horas, $mins);
                         }
 
                         $horas = intdiv($state, 60);
                         $mins = $state % 60;
-
 
                         return sprintf('%02d:%02d', $horas, $mins);
                     })
@@ -141,10 +138,9 @@ class ComputosTable
 
                                     $minutos_computo = $record->disponible;
                                     $total = $minutos_computo - $difrute_sum;
+
                                     return $total;
                                 });
-
-
 
                                 $horas = intdiv($total, 60);
                                 $mins = $total % 60;
@@ -152,8 +148,6 @@ class ComputosTable
                                 return sprintf('%02d:%02d', $horas, $mins);
                             })
                     ),
-
-
 
                 TextColumn::make('deleted_at')
                     ->dateTime()
@@ -169,18 +163,16 @@ class ComputosTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
 
-
-
-
             ->filters([
 
                 // //filtro por año
                 SelectFilter::make('year')
                     ->label(__('Año'))
                     ->preload(true)
-                    //mostrar una lista de años, en los que se dispone de día adicional
+                    // mostrar una lista de años, en los que se dispone de día adicional
                     ->options(function () {
-                        $years =  DB::table('computos')->distinct()->orderBy('year', 'asc')->pluck('year', 'year')->toArray();
+                        $years = DB::table('computos')->distinct()->orderBy('year', 'asc')->pluck('year', 'year')->toArray();
+
                         return $years;
                     })
                     ->default(date('Y'))
@@ -189,35 +181,33 @@ class ComputosTable
 
                 SelectFilter::make('user_id')
                     ->label(__('Usuario'))
-                    ->options(\App\Models\User::pluck('name', 'id'))
+                    ->options(User::pluck('name', 'id'))
                     ->searchable(),
-
 
             ])
             ->recordActions([
                 ViewAction::make()->hiddenLabel(true)->tooltip(__('Ver'))->color('primary'),
-
 
                 EditAction::make()
                     ->hiddenLabel(true)
                     ->tooltip(__('Edit'))
                     ->color('success')
                     ->modalWidth(Width::Small)
-                    ->mutateRecordDataUsing(function (array $data,  $record): array {
+                    ->mutateRecordDataUsing(function (array $data, $record): array {
 
                         $horas = intdiv($record->disponible, 60);
                         $minutos = $record->disponible % 60;
 
                         $data['horas'] = $horas;
                         $data['minutos'] = $minutos;
+
                         return $data;
                     })
                     ->action(function ($data, EditAction $action, $record) {
 
-                        //comvertir los campos horas y minutos a minutos para guardar en la DB
+                        // comvertir los campos horas y minutos a minutos para guardar en la DB
 
                         $minutos_computo = ($data['horas'] * 60) + $data['minutos'];
-
 
                         $record->update([
 

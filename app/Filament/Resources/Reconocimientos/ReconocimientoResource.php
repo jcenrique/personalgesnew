@@ -5,12 +5,12 @@ namespace App\Filament\Resources\Reconocimientos;
 use App\Filament\Resources\Reconocimientos\Pages\ListReconocimientos;
 use App\Filament\Resources\Reconocimientos\Schemas\ReconocimientoForm;
 use App\Filament\Resources\Reconocimientos\Tables\ReconocimientosTable;
-use Illuminate\Database\Eloquent\Builder;
 use App\Models\Reconocimiento;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class ReconocimientoResource extends Resource
@@ -28,11 +28,12 @@ class ReconocimientoResource extends Resource
         return __('Gestión');
     }
 
-    //funciones de etiquetas singular y plural para el recurso
+    // funciones de etiquetas singular y plural para el recurso
     public static function getLabel(): string
     {
         return __('Reconocimiento');
     }
+
     public static function getPluralLabel(): string
     {
         return __('Reconocimientos');
@@ -59,8 +60,8 @@ class ReconocimientoResource extends Resource
     {
         return [
             'index' => ListReconocimientos::route('/'),
-            //'create' => CreateReconocimiento::route('/create'),
-            //'edit' => EditReconocimiento::route('/{record}/edit'),
+            // 'create' => CreateReconocimiento::route('/create'),
+            // 'edit' => EditReconocimiento::route('/{record}/edit'),
         ];
     }
 
@@ -70,7 +71,7 @@ class ReconocimientoResource extends Resource
     //       return static::getModel()::query()
     //     ->latestPerUser();
     // }
-       public static function getEloquentQuery(): Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
             ->whereHas('user.residencias', function (Builder $query) {

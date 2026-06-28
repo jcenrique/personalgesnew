@@ -9,18 +9,16 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-
 class CoursesTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-
-              ->columns([
+            ->columns([
                 TextColumn::make('name')
                     ->label(__('Nombre'))
                     ->searchable(),
-                  TextColumn::make('description')
+                TextColumn::make('description')
                     ->label(__('Descripción'))
                     ->limit(50),
                 TextColumn::make('last_attendance_date')
@@ -30,7 +28,7 @@ class CoursesTable
                         $user = auth()->user();
 
                         $lastAction = $record->trainingActions()
-                            ->whereHas('users', fn($q) => $q->where('users.id', $user->id))
+                            ->whereHas('users', fn ($q) => $q->where('users.id', $user->id))
                             ->orderByDesc('training_actions.end_date')
                             ->first();
 
@@ -48,7 +46,6 @@ class CoursesTable
                     ->label(__('Requiere renovación'))
                     ->boolean(),
 
-
                 TextColumn::make('renewal_remaining_years')
                     ->label(__('Años restantes'))
                     ->getStateUsing(function ($record) {
@@ -61,7 +58,7 @@ class CoursesTable
 
                         // Última acción formativa del usuario para este curso
                         $lastAction = $record->trainingActions()
-                            ->whereHas('users', fn($q) => $q->where('users.id', $user->id))
+                            ->whereHas('users', fn ($q) => $q->where('users.id', $user->id))
                             ->orderByDesc('training_actions.end_date')
                             ->first();
 
@@ -71,17 +68,17 @@ class CoursesTable
 
                         $lastDate = $lastAction->end_date;
                         $yearsPassed = $lastDate->diffInYears(now());
-                        $remaining =intval( $record->renewal_years - $yearsPassed);
+                        $remaining = intval($record->renewal_years - $yearsPassed);
 
-                        return $remaining > 0 ? $remaining . ' ' .  __('años') : '0 ' . __('años');
+                        return $remaining > 0 ? $remaining.' '.__('años') : '0 '.__('años');
                     })
-                    ->sortable()
+                    ->sortable(),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
-                //EditAction::make()
+                // EditAction::make()
 
             ])
             ->toolbarActions([

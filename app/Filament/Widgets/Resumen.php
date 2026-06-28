@@ -19,27 +19,54 @@ use Filament\Support\Enums\TextSize;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
-use Filament\Widgets\Widget;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class Resumen extends TableWidget implements HasSchemas
 {
+    use HasResizableColumn;
+    use HasWidgetShield;
     use InteractsWithSchemas;
 
-
-
-    use HasWidgetShield;
-    use HasResizableColumn;
-
+    protected static ?int $sort = 1;
 
     protected string $view = 'filament.widgets.resumen';
 
+    public static function canView(): bool
+    {
+        return auth()->check();
+    }
+
+    protected function getPendingQuery(): Builder
+    {
+        $user = auth()->user();
+
+        $query = Disfrute::query()->where('status', StatusSolicitudes::Solicitado);
+
+        if (! $user) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        $zonaIds = $user->zonas()
+            ->pluck('zonas.id')
+            ->toArray();
+
+        if (! empty($zonaIds)) {
+            $query->whereHas('user.residencias', function (Builder $q) use ($zonaIds) {
+                $q->whereIn('zona_id', $zonaIds);
+            });
+        }
+
+        return $query;
+    }
+
+    public function hasPendingSolicitudes(): bool
+    {
+        return $this->getPendingQuery()->exists();
+    }
 
     public function reconocimiento(Schema $schema): Schema
     {
@@ -57,6 +84,7 @@ class Resumen extends TableWidget implements HasSchemas
                         if ($record) {
                             return $record->fecha->translatedFormat('d F Y');
                         }
+
                         return __('No hay registros');
                     })
                     ->size(TextSize::Large)
@@ -67,39 +95,20 @@ class Resumen extends TableWidget implements HasSchemas
             ]);
     }
 
-
-    protected function getTableHeading(): string | Htmlable | null
+    protected function getTableHeading(): string|Htmlable|null
     {
         return __('Solicitudes pendientes');
     }
 
-    public function getColumnSpan(): int | string | array
+    public function getColumnSpan(): int|string|array
     {
         return 'full';
     }
 
-
     public function table(Table $table): Table
     {
         return $table
-            // ->query(fn(): Builder => Disfrute::query()->where('status' , StatusSolicitudes::Solicitado))
-            ->query(function (): Builder {
-                $user = auth()->user();
-                $query = Disfrute::query()->where('status', StatusSolicitudes::Solicitado);
-
-                // filtrar por zonas del usuario autenticado
-                $zonaIds = $user->zonas()
-                    ->pluck('zonas.id')
-                    ->toArray();
-
-                if (! empty($zonaIds)) {
-                    $query->whereHas('user.residencias', function (Builder $q) use ($zonaIds) {
-                        $q->whereIn('zona_id', $zonaIds);
-                    });
-                }
-
-                return $query;
-            })
+            ->query(fn(): Builder => $this->getPendingQuery())
             ->columns([
                 TextColumn::make('user.name')
                     ->label(__('User'))
@@ -112,28 +121,33 @@ class Resumen extends TableWidget implements HasSchemas
 
                         if ($record->disfrutable_type === 'App\Models\Sabado') {
                             return __('Sábado');
-                        } else if ($record->disfrutable_type === 'App\Models\Additionalday') {
+                        } elseif ($record->disfrutable_type === 'App\Models\Additionalday') {
                             return __('Día adicional');
-                        } else if ($record->disfrutable_type === 'App\Models\Companyday') {
+                        } elseif ($record->disfrutable_type === 'App\Models\Computo') {
+                            return __('Computo');
+                        } elseif ($record->disfrutable_type === 'App\Models\Companyday') {
                             return __('Día solicitado por la empresa');
                         }
+
                         // Agrega más condiciones para otros tipos de recursos si es necesario
                         return $record->disfrutable_type;
                     })
-                    //mostrar la fecha de sabado  asociada si el recurso es un sabado, utilizando la relación entre rechazo y sábado para obtener la fecha de sabado trabajado asociada al rechazo
+                    // mostrar la fecha de sabado  asociada si el recurso es un sabado, utilizando la relación entre rechazo y sábado para obtener la fecha de sabado trabajado asociada al rechazo
                     ->description(function ($record) {
 
                         if ($record->disfrutable_type === 'App\Models\Sabado') {
-                            return  $record->disfrutable()->latest()->first()->sabado_trabajado?->translatedFormat('d F Y');
-                        } else if ($record->disfrutable_type === 'App\Models\Additionalday') {
-                            return  $record->disfrutable()->latest()->first()->year;
-                        } else if ($record->disfrutable_type === 'App\Models\Companyday') {
-                            return  $record->disfrutable()->latest()->first()->fecha?->translatedFormat('d F Y');
+                            return $record->disfrutable()->latest()->first()->sabado_trabajado?->translatedFormat('d F Y');
+                        } elseif ($record->disfrutable_type === 'App\Models\Additionalday') {
+                            return $record->disfrutable()->latest()->first()->year;
+                        } elseif ($record->disfrutable_type === 'App\Models\Computo') {
+                            return $record->disfrutable()->latest()->first()->year;
+                        } elseif ($record->disfrutable_type === 'App\Models\Companyday') {
+                            return $record->disfrutable()->latest()->first()->fecha?->translatedFormat('d F Y');
                         }
+
                         // Agrega más condiciones para otros tipos de recursos si es necesario
                         return '';
                     }),
-
 
                 // TextColumn::make('disfrutable_type')
                 //     ->searchable(),
@@ -148,10 +162,11 @@ class Resumen extends TableWidget implements HasSchemas
                     ->getStateUsing(function ($record) {
                         $horas = intdiv($record->minutos_solicitados, 60);
                         $mins = $record->minutos_solicitados % 60;
-                        //si el tipo es computo mostrar formato horas si no vacio
+                        // si el tipo es computo mostrar formato horas si no vacio
                         if ($record->disfrutable_type === 'App\Models\Computo') {
                             return sprintf('%02d:%02d', $horas, $mins);
                         }
+
                         return null;
                     })
 
@@ -168,7 +183,7 @@ class Resumen extends TableWidget implements HasSchemas
                 //
             ])
             ->recordActions([
-                //poner acciones de aprobar y denegar
+                // poner acciones de aprobar y denegar
 
                 AprobarDisfruteAction::make('aprobar')
                     ->hiddenLabel(true),

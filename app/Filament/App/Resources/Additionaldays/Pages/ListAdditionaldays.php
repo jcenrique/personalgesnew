@@ -16,17 +16,18 @@ use Illuminate\Support\Facades\Auth;
 class ListAdditionaldays extends ListRecords
 {
     use HasResizableColumn;
+
     protected static string $resource = AdditionaldayResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-           // CreateAction::make(),
+            // CreateAction::make(),
         ];
     }
 
-    //filtar par mostrar segun el satatus con Tabs
-    public  function getTabs(): array
+    // filtar par mostrar segun el satatus con Tabs
+    public function getTabs(): array
     {
         return [
             'available' => Tab::make(__('Disponibles'))
@@ -34,31 +35,31 @@ class ListAdditionaldays extends ListRecords
                 ->badgeColor(StatusSolicitudes::Disponible->getColor())
                 ->badge(function () {
 
-                     $dias = Additionalday::where ('user_id', Auth::id());
+                    $dias = Additionalday::where('user_id', Auth::id());
                     $count = $dias
-                       ->doesntHave('disfrute')
-                       ->get()
+                        ->doesntHave('disfrute')
+                        ->get()
                         ->count();
 
                     return $count > 0 ? $count : null;
                 })
-                ->query(function(Builder $query){
-                   $query
-                       ->doesntHave('disfrute')
-                       ->get();
+                ->query(function (Builder $query) {
+                    $query
+                        ->doesntHave('disfrute')
+                        ->get();
                 }),
-                //->query(fn($query) => $query->where('status', \App\Enum\StatusSolicitudes::Disponible)),
+            // ->query(fn($query) => $query->where('status', \App\Enum\StatusSolicitudes::Disponible)),
 
             'requested' => Tab::make(__('Solicitados'))
                 ->icon(Heroicon::PaperAirplane)
                 ->badgeColor(StatusSolicitudes::Solicitado->getColor())
                 ->badge(function () {
 
-                $dias = Additionalday::where ('user_id', Auth::id());
+                    $dias = Additionalday::where('user_id', Auth::id());
 
                     $count = $dias
-                        ->whereHas('disfrute' , function(Builder $query){
-                            //dd($query->where('status', StatusSolicitudes::Solicitado));
+                        ->whereHas('disfrute', function (Builder $query) {
+                            // dd($query->where('status', StatusSolicitudes::Solicitado));
                             $query->where('status', StatusSolicitudes::Solicitado);
 
                         })
@@ -66,10 +67,10 @@ class ListAdditionaldays extends ListRecords
 
                     return $count > 0 ? $count : null;
                 })
-                 ->query(function(Builder $query){
-                   $query
-                       ->whereHas('disfrute' , function(Builder $query){
-                            //dd($query->where('status', StatusSolicitudes::Solicitado));
+                ->query(function (Builder $query) {
+                    $query
+                        ->whereHas('disfrute', function (Builder $query) {
+                            // dd($query->where('status', StatusSolicitudes::Solicitado));
                             $query->where('status', StatusSolicitudes::Solicitado);
 
                         })
@@ -80,11 +81,11 @@ class ListAdditionaldays extends ListRecords
                 ->icon(Heroicon::CheckBadge)
                 ->badgeColor(StatusSolicitudes::Aprobado->getColor())
                 ->badge(function () {
-                    $dias = Additionalday::where ('user_id', Auth::id());
+                    $dias = Additionalday::where('user_id', Auth::id());
 
                     $count = $dias
-                        ->whereHas('disfrute' , function(Builder $query){
-                            //dd($query->where('status', StatusSolicitudes::Solicitado));
+                        ->whereHas('disfrute', function (Builder $query) {
+                            // dd($query->where('status', StatusSolicitudes::Solicitado));
                             $query->where('status', StatusSolicitudes::Aprobado);
 
                         })
@@ -93,28 +94,27 @@ class ListAdditionaldays extends ListRecords
                     return $count > 0 ? $count : null;
                 })
 
-                ->query(function(Builder $query){
-                   $query
-                       ->whereHas('disfrute' , function(Builder $query){
-                            //dd($query->where('status', StatusSolicitudes::Solicitado));
+                ->query(function (Builder $query) {
+                    $query
+                        ->whereHas('disfrute', function (Builder $query) {
+                            // dd($query->where('status', StatusSolicitudes::Solicitado));
                             $query->where('status', StatusSolicitudes::Aprobado);
 
                         })
                         ->get();
                 }),
 
-
             'all' => Tab::make(__('Todos'))
                 ->icon(Heroicon::Square3Stack3d)
                 ->badgeColor('primary')
                 ->badge(function () {
 
-                 $dias = Additionalday::where ('user_id', Auth::id());
-                    $count =$dias->get()->count();
+                    $dias = Additionalday::where('user_id', Auth::id());
+                    $count = $dias->get()->count();
 
                     return $count > 0 ? $count : null;
                 })
-                ->query(fn($query) => $query),
+                ->query(fn ($query) => $query),
         ];
     }
 }

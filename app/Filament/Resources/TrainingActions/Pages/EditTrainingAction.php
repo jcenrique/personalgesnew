@@ -8,10 +8,8 @@ use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Resources\Pages\EditRecord;
-
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Form;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
@@ -39,14 +37,14 @@ class EditTrainingAction extends EditRecord
                     ->label(__('Tipo de acción'))
                     ->options([
                         'interna' => __('Interna'),
-                        'externa' => __('Externa')
+                        'externa' => __('Externa'),
                     ])
                     ->required(),
                 Select::make('mode')
                     ->label(__('Modalidad'))
                     ->options([
                         'presencial' => __('Presencial'),
-                        'online' => __('On Line')
+                        'online' => __('On Line'),
                     ])
                     ->required(),
                 TextInput::make('location')
@@ -64,7 +62,7 @@ class EditTrainingAction extends EditRecord
                     ->closeOnDateSelection()
                     ->after('2020-01-01')
                     ->reactive()
-                    ->afterStateUpdated(function ($state, callable  $set) {
+                    ->afterStateUpdated(function ($state, callable $set) {
 
                         $set('end_date', $state);
                     })
@@ -92,7 +90,6 @@ class EditTrainingAction extends EditRecord
         return $record;
     }
 
-
     protected function getHeaderActions(): array
     {
         $record = $this->getRecord();
@@ -117,7 +114,7 @@ class EditTrainingAction extends EditRecord
             Action::make('export_attendees_pdf')
                 ->label(__('Asistentes a PDF'))
                 ->icon('heroicon-o-arrow-down-tray')
-                ->url(fn() => route('training-actions.attendees-pdf', ['trainingAction' => $record]))
+                ->url(fn () => route('training-actions.attendees-pdf', ['trainingAction' => $record]))
                 ->openUrlInNewTab(),
             DeleteAction::make(),
         ];

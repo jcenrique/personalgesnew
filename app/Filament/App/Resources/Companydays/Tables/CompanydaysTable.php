@@ -5,10 +5,8 @@ namespace App\Filament\App\Resources\Companydays\Tables;
 use App\Enum\StatusSolicitudes;
 use App\Filament\App\Resources\Companydays\Actions\SolicitarCompanyday;
 use Filament\Actions\BulkActionGroup;
-
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,10 +16,9 @@ class CompanydaysTable
     {
         return $table
             ->columns([
-                  TextColumn::make('fecha')
+                TextColumn::make('fecha')
                     ->label(__('Fecha'))
                     ->date('d F Y')
-
                     ->sortable(),
                 TextColumn::make('razon')
                     ->label(__('Razón'))
@@ -47,19 +44,17 @@ class CompanydaysTable
                     ->visible(
                         function ($record, $livewire) {
 
-
                             return $record->disfrute == null && ($livewire->activeTab === 'available' || $livewire->activeTab === 'all');
                         }
-                    )
+                    ),
 
             ])
-
-             ->modifyQueryUsing(function ($query) {
+            ->modifyQueryUsing(function ($query) {
                 $query->where('user_id', Auth::id());
             })
             ->toolbarActions([
                 BulkActionGroup::make([
-                   // DeleteBulkAction::make(),
+                    // DeleteBulkAction::make(),
                 ]),
             ]);
     }

@@ -5,9 +5,9 @@ namespace App\Console\Commands;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-
 
 #[Signature('app:migrate-old-data')]
 #[Description('Command description')]
@@ -28,26 +28,25 @@ class MigrateOldData extends Command
 
         // 2 Migracion dias adicionales
 
-        //$this->migrateDiasAdicionales();
+        // $this->migrateDiasAdicionales();
 
         // migracion disponiblidades
-        //$this->migrateDisponibilidades();
+        // $this->migrateDisponibilidades();
 
-        //migrar sabados
+        // migrar sabados
 
-        //$this->migrateSabados();
+        // $this->migrateSabados();
 
-        //migrar computos
+        // migrar computos
         // $this->migrateComputos();
 
-        //migrar reconocimientos
+        // migrar reconocimientos
         // $this->migrateReconocimientos();
 
-        //migrar cursos
-       // $this->migrateCursos();
+        // migrar cursos
+        // $this->migrateCursos();
 
-
-       //migrar dias pedidos por la empresa de la tabla de personalges dias_pedidos_empresa a las tabla de laravel companydays, para ello hay que buscar en la tabla de personalges los dias pedidos por la empresa y relacionarlos con los usuarios de la tabla users de laravel, para ello hay que buscar en la tabla de personalges los usuarios que tienen el mismo codigo_agente que los usuarios de la tabla users de laravel y relacionarlos con los dias pedidos por la empresa, además hay que buscar en la tabla de personalges los dias pedidos por la empresa que tienen el mismo codigo_agente que los usuarios de la tabla users de laravel y relacionarlos con los dias pedidos por la empresa, para ello hay que buscar en la tabla de personalges los usuarios que tienen el mismo codigo_agente que los usuarios de la tabla users de laravel y relacionarlos con los dias pedidos por la empresa, además hay que buscar en la tabla de personalges los dias pedidos por la empresa que tienen el mismo codigo_agente que los usuarios de la tabla users de laravel y relacionarlos con los dias pedidos por la empresa
+        // migrar dias pedidos por la empresa de la tabla de personalges dias_pedidos_empresa a las tabla de laravel companydays, para ello hay que buscar en la tabla de personalges los dias pedidos por la empresa y relacionarlos con los usuarios de la tabla users de laravel, para ello hay que buscar en la tabla de personalges los usuarios que tienen el mismo codigo_agente que los usuarios de la tabla users de laravel y relacionarlos con los dias pedidos por la empresa, además hay que buscar en la tabla de personalges los dias pedidos por la empresa que tienen el mismo codigo_agente que los usuarios de la tabla users de laravel y relacionarlos con los dias pedidos por la empresa, para ello hay que buscar en la tabla de personalges los usuarios que tienen el mismo codigo_agente que los usuarios de la tabla users de laravel y relacionarlos con los dias pedidos por la empresa, además hay que buscar en la tabla de personalges los dias pedidos por la empresa que tienen el mismo codigo_agente que los usuarios de la tabla users de laravel y relacionarlos con los dias pedidos por la empresa
         $this->migrateDiasPedidosEmpresa();
         // Puedes añadir aquí más métodos para otras tablas (clientes, facturas, etc.)
 
@@ -74,12 +73,11 @@ class MigrateOldData extends Command
                 'residencias.residencia as residencia',
                 'puestos_gestion.puesto as puesto'
 
-
-
             )
             ->get();
         if ($viejosUsuarios->isEmpty()) {
             $this->warn('No se encontraron agentes en personalges.');
+
             return;
         }
 
@@ -91,7 +89,6 @@ class MigrateOldData extends Command
 
         foreach ($viejosUsuarios->take(15) as $viejo) {
             // Determinamos si el registro actual tenía datos de agente asociado
-
 
             // Lógica de transformación combinada
 
@@ -108,8 +105,9 @@ class MigrateOldData extends Command
 
         $this->table($headers, $rows);
 
-        if (!$this->confirm('¿La estructura combinada se ve correcta? ¿Procedemos?', false)) {
+        if (! $this->confirm('¿La estructura combinada se ve correcta? ¿Procedemos?', false)) {
             $this->warn('Migración cancelada.');
+
             return;
         }
 
@@ -121,24 +119,24 @@ class MigrateOldData extends Command
         // $headers = ['Codigo', 'Email (De Users)', 'pass', 'name', 'status', 'locale', 'domain', 'creado', 'email verificado'];
         $datosNuevos = [];
 
-
         foreach ($viejosUsuarios as $viejo) {
             if ($viejo->agente_activo != 2) {
                 //  Preparamos el mapeo final unificando ambos mundos
                 $datosNuevos = [
-                    'codigo_agente'  => $viejo->usuario_codigo_agente ?? null,
-                    'email'      => $viejo->usuario_email,
-                    'password'   => $viejo->usuario_password,
-                    'name'       => $viejo->user_name,
-                    'status'     => $viejo->agente_activo ? 1 : 0,
-                    'locale'     => 'es',
-                    'domain'     => 'ets-rfv.eus',
+                    'codigo_agente' => $viejo->usuario_codigo_agente ?? null,
+                    'email' => $viejo->usuario_email,
+                    'password' => $viejo->usuario_password,
+                    'name' => $viejo->user_name,
+                    'status' => $viejo->agente_activo ? 1 : 0,
+                    'locale' => 'es',
+                    'domain' => 'ets-rfv.eus',
                     'created_at' => now(),
                     'email_verified_at' => now(),
                 ];
             } else {
                 // No hay datos mapeados para este registro, lo saltamos
                 $bar->advance();
+
                 continue;
             }
 
@@ -148,21 +146,22 @@ class MigrateOldData extends Command
                 if ($inserted === 0) {
                     $this->warn(sprintf('Registro ignorado (posible duplicado) -> email: %s, codigo_agente: %s', $viejo->usuario_email, $viejo->usuario_codigo_agente));
                 } else {
-                    //hay que buscar la residencia del nuevo usuario en la DB personalges y si no existe la residencia se crea una nueva residencia en la DB laravel y se asigna al nuevo usuario, además de buscar la zona en personalges con el puesto del agente y asignar esa zona al nuevo usuario en laravel
-                    //con la residencia se busca la zona en personalges que equivale a la tabla puestos gestion (P.M. ATXURI => zona BIZKAIA, P.M. DONOSTIA => zona GIPUZKOA) y se asigna la zona al nuevo usuario en la DB laravel
+                    // hay que buscar la residencia del nuevo usuario en la DB personalges y si no existe la residencia se crea una nueva residencia en la DB laravel y se asigna al nuevo usuario, además de buscar la zona en personalges con el puesto del agente y asignar esa zona al nuevo usuario en laravel
+                    // con la residencia se busca la zona en personalges que equivale a la tabla puestos gestion (P.M. ATXURI => zona BIZKAIA, P.M. DONOSTIA => zona GIPUZKOA) y se asigna la zona al nuevo usuario en la DB laravel
                     $residencia = DB::connection('mysql')->table('residencias')->where('name', $viejo->residencia)->first();
-                    //si el usuario no tiene residencia asignada en personalges no se hace nada y se omite el attach en la tabla residencia_user y user_zona
-                    if (!$viejo->residencia) {
-                        //asignar el rol de admin
+                    // si el usuario no tiene residencia asignada en personalges no se hace nada y se omite el attach en la tabla residencia_user y user_zona
+                    if (! $viejo->residencia) {
+                        // asignar el rol de admin
                         DB::connection('mysql')->table('model_has_roles')->insert([
                             'role_id' => 2, // Asignamos el rol de 'agente' por defecto para cargos desconocidos
                             'model_id' => DB::connection('mysql')->table('users')->where('email', $viejo->usuario_email)->value('id'),
                             'model_type' => 'App\Models\User',
                         ]);
+
                         continue;
                     }
 
-                    if (!$residencia) {
+                    if (! $residencia) {
 
                         $nuevaResidenciaId = DB::connection('mysql')->table('residencias')->insertGetId([
                             'name' => $viejo->residencia,
@@ -176,7 +175,6 @@ class MigrateOldData extends Command
                     }
                     $zona = DB::connection('old_db')->table('puestos_gestion')->where('puesto', $viejo->puesto)->value('puesto');
                     $datosNuevos['residencia_id'] = $nuevaResidenciaId;
-
 
                     // attach en tabla residencia_user
                     DB::connection('mysql')->table('residencia_user')->insert([
@@ -199,7 +197,6 @@ class MigrateOldData extends Command
                                 'role_id' => 3,
                                 'model_id' => DB::connection('mysql')->table('users')->where('email', $viejo->usuario_email)->value('id'),
                                 'model_type' => 'App\Models\User',
-
 
                             ]);
                             break;
@@ -241,20 +238,20 @@ class MigrateOldData extends Command
                             ]);
                     }
                 }
-            } catch (\Illuminate\Database\QueryException $e) {
+            } catch (QueryException $e) {
                 $this->error(sprintf('Error al insertar -> email: %s | SQL: %s', $viejo->usuario_email, $e->getMessage()));
             }
 
             $bar->advance();
         }
 
-        //$this->table($headers, $datosNuevos);
+        // $this->table($headers, $datosNuevos);
 
         $bar->finish();
         $this->newLine(2);
     }
 
-    //funcion para cargar los dias adicionales de la tabla dia_adicional_vacaciones a la tabla additionaldays   de cada usuario
+    // funcion para cargar los dias adicionales de la tabla dia_adicional_vacaciones a la tabla additionaldays   de cada usuario
     private function migrateDiasAdicionales()
     {
         $this->info('Migrando días adicionales de vacaciones...');
@@ -264,6 +261,7 @@ class MigrateOldData extends Command
 
         if ($diasAdicionales->isEmpty()) {
             $this->warn('No se encontraron días adicionales de vacaciones en la antigua DB.');
+
             return;
         }
 
@@ -285,8 +283,8 @@ class MigrateOldData extends Command
                         'updated_at' => now(),
                     ]);
 
-                    //insertar el dia de disfrute de la tabla dia_adicional_vacaciones de personalges en la tabla de disfrutes de laravel, con el id del día adicional que acabamos de insertar y la fecha de disfrute
-                    //la tabla disfrutes es una tabla morph que tiene un campo para el modelo y otro para el id del model
+                    // insertar el dia de disfrute de la tabla dia_adicional_vacaciones de personalges en la tabla de disfrutes de laravel, con el id del día adicional que acabamos de insertar y la fecha de disfrute
+                    // la tabla disfrutes es una tabla morph que tiene un campo para el modelo y otro para el id del model
                     if ($dia->fecha_disfrute) {
 
                         DB::connection('mysql')->table('disfrutes')->insert([
@@ -305,12 +303,12 @@ class MigrateOldData extends Command
                                 'disfrutable_id' => $diaadcional_id,
                                 'disfrutable_type' => 'App\Models\Additionalday',
                                 'status' => 'aprobado',
-                                //como el dia no puede estar duplicado hay que generar una fecha de disfrute única, para ello se puede usar el año del día adicional y el id del día adicional para generar una fecha de disfrute única, por ejemplo: 31 de diciembre del año del día adicional más el id del día adicional en días, para que no haya fechas de disfrute duplicadas en caso de que haya varios días adicionales sin fecha de disfrute en el mismo año
+                                // como el dia no puede estar duplicado hay que generar una fecha de disfrute única, para ello se puede usar el año del día adicional y el id del día adicional para generar una fecha de disfrute única, por ejemplo: 31 de diciembre del año del día adicional más el id del día adicional en días, para que no haya fechas de disfrute duplicadas en caso de que haya varios días adicionales sin fecha de disfrute en el mismo año
                                 'fecha_disfrute' => now()->setDate(2000, 12, 31)->addDays($diaadcional_id),
                             ]);
                         }
                     }
-                } catch (\Illuminate\Database\QueryException $e) {
+                } catch (QueryException $e) {
                     $this->error(sprintf('Error al insertar día adicional -> email: %s | SQL: %s', $dia->codigo_agente, $e->getMessage()));
                 }
             } else {
@@ -325,7 +323,7 @@ class MigrateOldData extends Command
         $this->info('Migración de días adicionales completada.');
     }
 
-    //migrar las disponibilidades solicitadas de la db personalges a la tabla laravel
+    // migrar las disponibilidades solicitadas de la db personalges a la tabla laravel
     private function migrateDisponibilidades()
     {
         $this->info('Migrando disponibilidades solicitadas...');
@@ -335,6 +333,7 @@ class MigrateOldData extends Command
 
         if ($disponibilidades->isEmpty()) {
             $this->warn('No se encontraron disponibilidades solicitadas en la antigua DB.');
+
             return;
         }
 
@@ -356,7 +355,7 @@ class MigrateOldData extends Command
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
-                } catch (\Illuminate\Database\QueryException $e) {
+                } catch (QueryException $e) {
                     $this->error(sprintf('Error al insertar disponibilidad -> email: %s | SQL: %s', $disp->codigo_agente, $e->getMessage()));
                 }
             } else {
@@ -371,8 +370,7 @@ class MigrateOldData extends Command
         $this->info('Migración de disponibilidades completada.');
     }
 
-
-    //funcion para cargar los dias adicionales de la tabla sabados_trabajados a la tabla sabados   de cada usuario
+    // funcion para cargar los dias adicionales de la tabla sabados_trabajados a la tabla sabados   de cada usuario
     private function migrateSabados()
     {
         $this->info('Migrando Sabados...');
@@ -382,6 +380,7 @@ class MigrateOldData extends Command
 
         if ($sabados->isEmpty()) {
             $this->warn('No se encontraron sábados en la antigua DB.');
+
             return;
         }
 
@@ -403,8 +402,8 @@ class MigrateOldData extends Command
                         'updated_at' => now(),
                     ]);
 
-                    //insertar el dia de disfrute de la tabla dia_adicional_vacaciones de personalges en la tabla de disfrutes de laravel, con el id del día adicional que acabamos de insertar y la fecha de disfrute
-                    //la tabla disfrutes es una tabla morph que tiene un campo para el modelo y otro para el id del model
+                    // insertar el dia de disfrute de la tabla dia_adicional_vacaciones de personalges en la tabla de disfrutes de laravel, con el id del día adicional que acabamos de insertar y la fecha de disfrute
+                    // la tabla disfrutes es una tabla morph que tiene un campo para el modelo y otro para el id del model
                     if ($sabado->fecha_devolucion) {
 
                         DB::connection('mysql')->table('disfrutes')->insert([
@@ -416,7 +415,7 @@ class MigrateOldData extends Command
 
                         ]);
                     }
-                } catch (\Illuminate\Database\QueryException $e) {
+                } catch (QueryException $e) {
                     $this->error(sprintf('Error al insertar sabado -> codigo_agente: %s | SQL: %s', $sabado->codigo_agente, $e->getMessage()));
                 }
             } else {
@@ -431,8 +430,7 @@ class MigrateOldData extends Command
         $this->info('Migración de sábados completada.');
     }
 
-
-    //funcion para cargar los computos de la tabla computos a la tabla computos   de cada usuario
+    // funcion para cargar los computos de la tabla computos a la tabla computos   de cada usuario
     private function migrateComputos()
     {
         $this->info('Migrando Computos...');
@@ -442,6 +440,7 @@ class MigrateOldData extends Command
 
         if ($computos->isEmpty()) {
             $this->warn('No se encontraron computos en la antigua DB.');
+
             return;
         }
 
@@ -464,10 +463,10 @@ class MigrateOldData extends Command
                     ]);
                     // buscar los dias disfrutados de computo en la DB personalges  en la tabla computo_devoluciones relacionado con el registro actua de computo
                     $dias_disfrutados_computo = DB::connection('old_db')->table('computo_devoluciones')->where('computo_id', $computo->id)->get();
-                    //insertar el dia de disfrute de la tabla dia_adicional_vacaciones de personalges en la tabla de disfrutes de laravel, con el id del día adicional que acabamos de insertar y la fecha de disfrute
-                    //la tabla disfrutes es una tabla morph que tiene un campo para el modelo y otro para el id del model
+                    // insertar el dia de disfrute de la tabla dia_adicional_vacaciones de personalges en la tabla de disfrutes de laravel, con el id del día adicional que acabamos de insertar y la fecha de disfrute
+                    // la tabla disfrutes es una tabla morph que tiene un campo para el modelo y otro para el id del model
                     if ($dias_disfrutados_computo) {
-                        //por cada dia disfrutado en computos_devoluciones crear un registro en disfrutes
+                        // por cada dia disfrutado en computos_devoluciones crear un registro en disfrutes
                         foreach ($dias_disfrutados_computo as $dia) {
                             DB::connection('mysql')->table('disfrutes')->insert([
                                 'user_id' => $userId,
@@ -480,7 +479,7 @@ class MigrateOldData extends Command
                             ]);
                         }
                     }
-                } catch (\Illuminate\Database\QueryException $e) {
+                } catch (QueryException $e) {
                     $this->error(sprintf('Error al insertar computo -> codigo_agente: %s | SQL: %s', $computo->codigo_agente, $e->getMessage()));
                 }
             } else {
@@ -495,7 +494,7 @@ class MigrateOldData extends Command
         $this->info('Migración de sábados completada.');
     }
 
-    //funcion para cargar los reconocimientos dela old DB
+    // funcion para cargar los reconocimientos dela old DB
     private function migrateReconocimientos()
     {
         $this->info('Migrando Reconociminetos...');
@@ -505,6 +504,7 @@ class MigrateOldData extends Command
 
         if ($reconocimientos->isEmpty()) {
             $this->warn('No se encontraron reconocimientos en la antigua DB.');
+
             return;
         }
 
@@ -527,7 +527,7 @@ class MigrateOldData extends Command
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
-                } catch (\Illuminate\Database\QueryException $e) {
+                } catch (QueryException $e) {
                     $this->error(sprintf('Error al insertar reconocimiento -> codigo_agente: %s | SQL: %s', $reconocimiento->codigo_agente, $e->getMessage()));
                 }
             } else {
@@ -542,7 +542,7 @@ class MigrateOldData extends Command
         $this->info('Migración de reconocimientos completada.');
     }
 
-    //funcion para cargar los cursos dela old DB
+    // funcion para cargar los cursos dela old DB
     private function migrateCursos()
     {
         $this->info('Migrando Cursos...');
@@ -552,6 +552,7 @@ class MigrateOldData extends Command
 
         if ($cursos->isEmpty()) {
             $this->warn('No se encontraron cursos en la antigua DB.');
+
             return;
         }
 
@@ -561,12 +562,10 @@ class MigrateOldData extends Command
         foreach ($cursos as $curso) {
             // Buscamos las acciones formativas asociadas al curso
 
-
-
             // Insertamos el día adicional en la tabla additionaldays
             try {
                 DB::transaction(function () use ($curso) {
-                    $curso_id =  DB::connection('mysql')->table('courses')->insertGetId([
+                    $curso_id = DB::connection('mysql')->table('courses')->insertGetId([
                         'name' => Str::upper($curso->nombre_curso),
                         'description' => $curso->descripcion,
 
@@ -577,22 +576,18 @@ class MigrateOldData extends Command
                         'updated_at' => now(),
                     ]);
 
-                    //asignar roles obligatorios al curso de la tabla pivot cursos_cargos
+                    // asignar roles obligatorios al curso de la tabla pivot cursos_cargos
                     $cargos = DB::connection('old_db')->table('cargos')->whereIn('id', function ($query) use ($curso) {
                         $query->select('cargo_id')->from('cursos_cargos')->where('curso_id', $curso->id);
                     })->get();
 
-
-
                     foreach ($cargos as $cargo) {
-
-
 
                         switch ($cargo->cargo) {
                             case 'JEFE DE SERVICIO':
                                 DB::connection('mysql')->table('course_role')->insert([
                                     'course_id' => $curso_id,
-                                    'role_id' =>  3,
+                                    'role_id' => 3,
                                     'created_at' => now(),
                                     'updated_at' => now(),
                                 ]);
@@ -601,7 +596,7 @@ class MigrateOldData extends Command
                             case 'TECNICO DE P.M.':
                                 DB::connection('mysql')->table('course_role')->insert([
                                     'course_id' => $curso_id,
-                                    'role_id' =>  4,
+                                    'role_id' => 4,
                                     'created_at' => now(),
                                     'updated_at' => now(),
                                 ]);
@@ -610,7 +605,7 @@ class MigrateOldData extends Command
                             case 'TECNICO RED':
                                 DB::connection('mysql')->table('course_role')->insert([
                                     'course_id' => $curso_id,
-                                    'role_id' =>  6,
+                                    'role_id' => 6,
                                     'created_at' => now(),
                                     'updated_at' => now(),
                                 ]);
@@ -619,7 +614,7 @@ class MigrateOldData extends Command
                             case 'TECNICO DE RED HABILITADO':
                                 DB::connection('mysql')->table('course_role')->insert([
                                     'course_id' => $curso_id,
-                                    'role_id' =>  7,
+                                    'role_id' => 7,
                                     'created_at' => now(),
                                     'updated_at' => now(),
                                 ]);
@@ -628,37 +623,34 @@ class MigrateOldData extends Command
                             case 'TECNICO DE P.M. INTEGRAL':
                                 DB::connection('mysql')->table('course_role')->insert([
                                     'course_id' => $curso_id,
-                                    'role_id' =>  5,
+                                    'role_id' => 5,
                                     'created_at' => now(),
                                     'updated_at' => now(),
                                 ]);
                                 break;
-                        };
-
+                        }
 
                     }
 
-
-                    //crear las acciones formativas asociadas al curso en la tabla training_actions, relacionando el curso con el id del curso que acabamos de insertar, el nombre del formador, el tipo de acción formativa (interna o externa), el lugar, la fecha de inicio y la fecha de fin
-                     $acciones_formativas = DB::connection('old_db')->table('formaciones')->where('curso_id', $curso->id)->get();
-
+                    // crear las acciones formativas asociadas al curso en la tabla training_actions, relacionando el curso con el id del curso que acabamos de insertar, el nombre del formador, el tipo de acción formativa (interna o externa), el lugar, la fecha de inicio y la fecha de fin
+                    $acciones_formativas = DB::connection('old_db')->table('formaciones')->where('curso_id', $curso->id)->get();
 
                     foreach ($acciones_formativas as $accion) {
                         $training_action_id = DB::connection('mysql')->table('training_actions')->insertGetId([
                             'course_id' => $curso_id,
-                            'company_name' =>Str::upper( $curso->empresa),
+                            'company_name' => Str::upper($curso->empresa),
                             'trainer_name' => $accion->formador,
                             'type' => 'interna',
-                            'location' =>  $accion->lugar,
+                            'location' => $accion->lugar,
                             'start_date' => $accion->fecha_inicio,
                             'end_date' => $accion->fecha_fin,
                             'mode' => 'presencial',
-                            'notes' =>  $accion->observacion,
+                            'notes' => $accion->observacion,
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);
 
-                        //relacionar el curso con los usuarios que realizaron la acción formativa, para ello hay que buscar en la tabla formaciones_users de la DB personalges los usuarios que realizaron la acción formativa y relacionarlos con el curso que acabamos de insertar en la tabla course_user de la DB laravel
+                        // relacionar el curso con los usuarios que realizaron la acción formativa, para ello hay que buscar en la tabla formaciones_users de la DB personalges los usuarios que realizaron la acción formativa y relacionarlos con el curso que acabamos de insertar en la tabla course_user de la DB laravel
                         $usuarios_formacion = DB::connection('old_db')->table('agentes_formations')->where('formacione_id', $accion->id)->get();
                         foreach ($usuarios_formacion as $usuario) {
                             $userId = DB::connection('mysql')->table('users')->where('codigo_agente', $usuario->codigo_agente)->value('id');
@@ -666,7 +658,7 @@ class MigrateOldData extends Command
                                 DB::connection('mysql')->table('training_action_user')->insert([
                                     'training_action_id' => $training_action_id,
                                     'user_id' => $userId,
-                                   // 'attended' =>0,
+                                    // 'attended' =>0,
 
                                     'created_at' => now(),
                                     'updated_at' => now(),
@@ -676,15 +668,12 @@ class MigrateOldData extends Command
                             }
                         }
 
-
-                     }
-
+                    }
 
                 });
-            } catch (\Illuminate\Database\QueryException $e) {
+            } catch (QueryException $e) {
                 $this->error(sprintf('Error al insertar curso', $e->getMessage()));
             }
-
 
             $bar->advance();
         }
@@ -694,9 +683,8 @@ class MigrateOldData extends Command
         $this->info('Migración de reconocimientos completada.');
     }
 
-
-   //migrar los dias pedidos de la empresa de la tabla dia_pedidos_empresa a la tabla additionaldays de cada usuario
-      private function migrateDiasPedidosEmpresa()
+    // migrar los dias pedidos de la empresa de la tabla dia_pedidos_empresa a la tabla additionaldays de cada usuario
+    private function migrateDiasPedidosEmpresa()
     {
         $this->info('Migrando días empresa...');
 
@@ -705,6 +693,7 @@ class MigrateOldData extends Command
 
         if ($diasEmpresa->isEmpty()) {
             $this->warn('No se encontraron días en la antigua DB.');
+
             return;
         }
 
@@ -726,20 +715,20 @@ class MigrateOldData extends Command
                         'updated_at' => now(),
                     ]);
 
-                    //insertar el dia de disfrute de la tabla dia_adicional_vacaciones de personalges en la tabla de disfrutes de laravel, con el id del día adicional que acabamos de insertar y la fecha de disfrute
-                    //la tabla disfrutes es una tabla morph que tiene un campo para el modelo y otro para el id del model
+                    // insertar el dia de disfrute de la tabla dia_adicional_vacaciones de personalges en la tabla de disfrutes de laravel, con el id del día adicional que acabamos de insertar y la fecha de disfrute
+                    // la tabla disfrutes es una tabla morph que tiene un campo para el modelo y otro para el id del model
                     if ($dia->fecha_devolucion) {
 
                         DB::connection('mysql')->table('disfrutes')->insert([
                             'user_id' => $userId,
                             'disfrutable_id' => $diaempresa_id,
                             'disfrutable_type' => 'App\Models\Companyday',
-                            'status' =>  'aprobado',
+                            'status' => 'aprobado',
                             'fecha_disfrute' => $dia->fecha_devolucion, // Asegúrate de que el formato de fecha sea compatible
 
                         ]);
                     }
-                } catch (\Illuminate\Database\QueryException $e) {
+                } catch (QueryException $e) {
                     $this->error(sprintf('Error al insertar día empresa -> email: %s | SQL: %s', $dia->codigo_agente, $e->getMessage()));
                 }
             } else {

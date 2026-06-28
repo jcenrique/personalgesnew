@@ -6,25 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class Categoriaelemento extends Model
 {
-    protected $table ='categoriaelementos';
+    protected $table = 'categoriaelementos';
 
     protected $fillable = [
         'nombre_es',
         'nombre_eu',
         'sort',
 
-         'active',
+        'active',
     ];
-
 
     protected $casts = [
-        'active' => 'boolean'
+        'active' => 'boolean',
     ];
 
-
     public function elementos()
-{
-    return $this->hasMany(Elementoinspeccion::class);
-}
-
+    {
+        return $this->hasMany(Elementoinspeccion::class);
+    }
 }

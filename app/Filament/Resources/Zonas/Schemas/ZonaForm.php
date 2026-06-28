@@ -15,10 +15,8 @@ class ZonaForm
                     ->label(__('Nombre de la zona'))
                     ->required()
 
-
                     ->extraInputAttributes(['class' => 'uppercase'])
-                    ->dehydrateStateUsing(fn($state) => strtoupper($state))
-
+                    ->dehydrateStateUsing(fn ($state) => strtoupper($state))
 
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),

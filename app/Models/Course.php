@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class Course extends Model
 {
@@ -22,7 +20,6 @@ class Course extends Model
     protected $casts = [
         'requires_renewal' => 'boolean',
     ];
-
 
     /*
     |--------------------------------------------------------------------------
@@ -46,8 +43,7 @@ class Course extends Model
             ->select('users.*')
             ->addSelect(
 
-                'training_action_user.attended as pivot_attended',
-                'training_action_user.certificate_path as pivot_certificate_path'
+                'training_action_user.attended as pivot_attended'
             );
     }
 
@@ -56,7 +52,6 @@ class Course extends Model
     {
         return $this->belongsToMany(Role::class, 'course_role');
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -73,13 +68,10 @@ class Course extends Model
     // Texto amigable para mostrar en Filament
     public function getRenewalTextAttribute()
     {
-        if (!$this->requires_renewal) {
+        if (! $this->requires_renewal) {
             return __('No requiere renovación');
         }
 
-        return __('Renovar cada')  . ' ' . $this->renewal_years . ' ' .  __('años');
+        return __('Renovar cada') . ' ' . $this->renewal_years . ' ' . __('años');
     }
-
-
-
 }

@@ -25,8 +25,7 @@ class DisponibilidadesTable
                     ->date('d F Y')
                     ->sortable(),
                 TextColumn::make('razon')
-                    ->label(__('Razón'))
-                    ,
+                    ->label(__('Razón')),
 
             ])
             ->filters([
@@ -34,23 +33,24 @@ class DisponibilidadesTable
                 SelectFilter::make('year')
                     ->label(__('Año'))
                     ->preload(true)
-                    //mostrar una lista de años, en los que se dispone de día adicional
+                    // mostrar una lista de años, en los que se dispone de día adicional
                     ->options(function () {
-                        $years =  DB::table('disponibilidades')->where('user_id', Auth::id())->distinct()->orderBy('year', 'asc')->pluck('year', 'year')->toArray();
+                        $years = DB::table('disponibilidades')->where('user_id', Auth::id())->distinct()->orderBy('year', 'asc')->pluck('year', 'year')->toArray();
+
                         return $years;
                     })
-                    //por defecto año actual
+                    // por defecto año actual
 
                     ->searchable()
                     ->placeholder(__('Selecciona un año')),
 
             ])
             ->recordActions([
-               // EditAction::make(),
+                // EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                   // DeleteBulkAction::make(),
+                    // DeleteBulkAction::make(),
                 ]),
             ]);
     }

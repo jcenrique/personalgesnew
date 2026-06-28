@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\Additionaldays\Actions;
 
-
 use App\Enum\StatusSolicitudes;
-use Carbon\Carbon;
+use App\Notifications\NotificacionAprobarAdditionalday;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
@@ -22,9 +21,9 @@ class AprobarAdditionaldayAction extends Action
         $this->modalHeading(__('Aprobar día adicional'))
             ->modalDescription(__('Puedes aprobar para que el usuario pueda disfrutar de su día de descanso'))
             ->modalWidth('md')
-            ->modalSubmitActionLabel(__('Aprobar') )
+            ->modalSubmitActionLabel(__('Aprobar'))
             ->modalIcon(Heroicon::CalendarDays);
-        //solo hay que aprobar el sábado trabajado, no es necesario seleccionar la fecha porque ya está registrada en la solicitud, por lo que se puede mostrar como información en el modal y cambiar el estado a aprobado al confirmar la acción
+        // solo hay que aprobar el sábado trabajado, no es necesario seleccionar la fecha porque ya está registrada en la solicitud, por lo que se puede mostrar como información en el modal y cambiar el estado a aprobado al confirmar la acción
         $this->schema([
             // Aquí puedes agregar campos adicionales para la solicitud, si es necesario
         ]);
@@ -33,8 +32,8 @@ class AprobarAdditionaldayAction extends Action
             $record->disfrute->status = StatusSolicitudes::Aprobado;
             $record->disfrute->save();
             $user = $record->user; // Obtener el usuario asociado al sábado trabajado
-            //notifiacar al usuario que su sábado trabajado ha sido aprobado
-            $user->notify(new \App\Notifications\NotificacionAprobarAdditionalday($record));
+            // notifiacar al usuario que su sábado trabajado ha sido aprobado
+            $user->notify(new NotificacionAprobarAdditionalday($record));
 
             Notification::make()
                 ->title(__('Día adicional aprobado'))
@@ -44,7 +43,7 @@ class AprobarAdditionaldayAction extends Action
                 ]))
                 ->success()
                 ->send();
-            //notificar por DB al usuario para que pueda ver la notificación en su panel de usuario
+            // notificar por DB al usuario para que pueda ver la notificación en su panel de usuario
             Notification::make()
                 ->title(__('Día adicional aprobado'))
                 ->body(__('El día adicional ha sido aprobado. El usuario podrá disfrutar de su día de descanso el :fecha_disfrute.', [
@@ -53,8 +52,7 @@ class AprobarAdditionaldayAction extends Action
                 ->success()
                 ->sendToDatabase($user);
 
-                $livewire->dispatch('refresh-sidebar');
-
+            $livewire->dispatch('refresh-sidebar');
 
         });
 

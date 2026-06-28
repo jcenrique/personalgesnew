@@ -23,19 +23,19 @@ class CategoriaelementoResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'nombre_es';
 
-     protected static ?int $navigationSort= 22;
+    protected static ?int $navigationSort = 22;
 
-
-   public static function getNavigationGroup(): string|UnitEnum|null
+    public static function getNavigationGroup(): string|UnitEnum|null
     {
         return __('Registro Inspecciones');
     }
 
-    //funciones de etiquetas singular y plural para el recurso
+    // funciones de etiquetas singular y plural para el recurso
     public static function getLabel(): string
     {
         return __('Categoría elemento');
     }
+
     public static function getPluralLabel(): string
     {
         return __('Categorías elementos');
@@ -44,9 +44,10 @@ class CategoriaelementoResource extends Resource
     // funcion para que aparezca el badge del numero de sabados disponibles
     public static function getNavigationBadge(): ?string
     {
-                 return  Categoriaelemento::count();
+        return Categoriaelemento::count();
     }
-    //badge color para el numero de usuarios
+
+    // badge color para el numero de usuarios
     public static function getNavigationBadgeColor(): ?string
     {
         return 'success';
@@ -73,8 +74,8 @@ class CategoriaelementoResource extends Resource
     {
         return [
             'index' => ListCategoriaelementos::route('/'),
-            //'create' => CreateCategoriaelemento::route('/create'),
-           // 'edit' => EditCategoriaelemento::route('/{record}/edit'),
+            // 'create' => CreateCategoriaelemento::route('/create'),
+            // 'edit' => EditCategoriaelemento::route('/{record}/edit'),
         ];
     }
 }

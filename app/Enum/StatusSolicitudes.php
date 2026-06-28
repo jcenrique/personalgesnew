@@ -9,16 +9,14 @@ use Filament\Support\Contracts\HasLabel;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 
-enum StatusSolicitudes: string implements HasLabel, HasIcon, HasColor
+enum StatusSolicitudes: string implements HasColor, HasIcon, HasLabel
 {
-
     case Disponible = 'disponible';
     case Solicitado = 'solicitado';
     case Aprobado = 'aprobado';
     case Rechazado = 'rechazado';
 
-
-    public function getLabel(): string | Htmlable | null
+    public function getLabel(): string|Htmlable|null
     {
         return match ($this) {
 
@@ -29,7 +27,7 @@ enum StatusSolicitudes: string implements HasLabel, HasIcon, HasColor
         };
     }
 
-    public function getColor(): string | array | null
+    public function getColor(): string|array|null
     {
         return match ($this) {
 
@@ -40,7 +38,7 @@ enum StatusSolicitudes: string implements HasLabel, HasIcon, HasColor
         };
     }
 
-    public function getIcon(): string | BackedEnum | Htmlable | null
+    public function getIcon(): string|BackedEnum|Htmlable|null
     {
         return match ($this) {
 

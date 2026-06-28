@@ -10,12 +10,14 @@ use Livewire\Attributes\On;
 class ViewComputo extends ViewRecord
 {
     protected static string $resource = ComputoResource::class;
+
     #[On('updateData')]
     public function updateData(array $data): void
     {
         $this->refresh();
 
     }
+
     protected function getHeaderActions(): array
     {
         return [

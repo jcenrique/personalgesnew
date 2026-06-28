@@ -58,8 +58,16 @@
             "@php artisan package:discover --ansi",
             "@php artisan filament:upgrade"
         ],
+        "post-install-cmd": [
+            "@php artisan filament:assets --ansi",
+            "@fix-resized-column-selector",
+            "@fix-guava-calendar-local-assets"
+        ],
         "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
+            "@php artisan filament:assets --ansi",
+            "@fix-resized-column-selector",
+            "@fix-guava-calendar-local-assets"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
@@ -76,6 +84,19 @@
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan test"
+        ],
+        "lang-sync": [
+            "@php artisan translatable:export es,eu",
+            "@php artisan translatable:inspect-translations eu || true"
+        ],
+        "fix-resized-column-selector": [
+            "sh scripts/fix-resized-column-selector.sh"
+        ],
+        "fix-guava-calendar-local-assets": [
+            "sh scripts/fix-guava-calendar-local-assets.sh"
+        ],
+        "check-guava-calendar-assets": [
+            "sh scripts/check-guava-calendar-assets.sh"
         ]
     },
     "extra": {

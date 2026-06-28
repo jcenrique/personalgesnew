@@ -3,13 +3,11 @@
 namespace App\Filament\Resources\Additionaldays\Schemas;
 
 use App\Enum\StatusSolicitudes;
-use App\Models\Additionalday;
 use App\Models\Disfrute;
+use App\Models\User;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Validation\Rule;
@@ -24,6 +22,7 @@ class AdditionaldayForm
                     ->label(__('Año'))
                     ->options(function () {
                         $currentYear = date('Y');
+
                         return [
                             $currentYear - 2 => $currentYear - 2,
                             $currentYear - 1 => $currentYear - 1,
@@ -38,9 +37,9 @@ class AdditionaldayForm
                 Select::make('user_id')
                     ->label(__('Usuario'))
                     ->searchable()
-                    ->options(\App\Models\User::pluck('name', 'id'))
-                    ->disabled(fn($operation) => $operation === 'edit')
-                    //cuando se seleccione una opcion actualizar DatePicker para deshabilitar los sábados ya registrados por ese usuario
+                    ->options(User::pluck('name', 'id'))
+                    ->disabled(fn ($operation) => $operation === 'edit')
+                    // cuando se seleccione una opcion actualizar DatePicker para deshabilitar los sábados ya registrados por ese usuario
                     ->reactive()
                     ->required(),
 
@@ -48,29 +47,23 @@ class AdditionaldayForm
                     ->label(__('Estado'))
                     ->options(StatusSolicitudes::class)
                     ->default(StatusSolicitudes::Disponible)
-                    ->visible(fn($operation) => $operation !== 'create')
+                    ->visible(fn ($operation) => $operation !== 'create')
                     ->required()
                     // si el estado cambia a disponible borrar el campo fecha de disfrute,
 
                     ->reactive()
                     ->afterStateUpdated(function (Get $get, $set, $state, $livewire, $record) {
 
-                        if (!$record->disfrute ) {
+                        if (! $record->disfrute) {
 
                             $set('disfrute.fecha_disfrute', null);
 
-
-
                         } elseif (in_array($state, [StatusSolicitudes::Solicitado, StatusSolicitudes::Aprobado])) {
-                            //recuperar el valor del campo fecha_disfrute del registro
+                            // recuperar el valor del campo fecha_disfrute del registro
                             $set('disfrute.fecha_disfrute', $record->fecha_disfrute);
 
-
-
-
-
-                        } else if ($state === StatusSolicitudes::Rechazado) {
-                            //si el estado cambia a rechazado mostrar el campo  y hacerlo requerido
+                        } elseif ($state === StatusSolicitudes::Rechazado) {
+                            // si el estado cambia a rechazado mostrar el campo  y hacerlo requerido
 
                             $set('disfrute.fecha_disfrute', $record->fecha_disfrute);
 
@@ -79,7 +72,7 @@ class AdditionaldayForm
 
                 DatePicker::make('disfrute.fecha_disfrute')
                     ->label(__('Fecha de disfrute'))
-                    //valor por defecto al editar que sea el valor del campo fecha_disfrute del registro
+                    // valor por defecto al editar que sea el valor del campo fecha_disfrute del registro
 
                     // ->rules(function (callable $get, $record) {
                     //     return [
@@ -91,8 +84,7 @@ class AdditionaldayForm
                     //     ];
                     // })
 
-
-                    //incluir pequeña descricion debajo del campo de fecha de disfrute que diga "Selecciona la fecha de disfrute para el día adicional, esta fecha no puede ser anterior a la fecha actual ni posterior a 12 meses a partir de la fecha actual, además se deshabilitarán las fechas ya registradas por el usuario seleccionado para disfrute"
+                    // incluir pequeña descricion debajo del campo de fecha de disfrute que diga "Selecciona la fecha de disfrute para el día adicional, esta fecha no puede ser anterior a la fecha actual ni posterior a 12 meses a partir de la fecha actual, además se deshabilitarán las fechas ya registradas por el usuario seleccionado para disfrute"
                     ->helperText(__('Selecciona la fecha de disfrute para el día adicional,
                                     esta fecha no puede ser posterior a 12 meses a partir de la fecha actual,
                                     además se deshabilitarán las fechas ya registradas por el usuario seleccionado para disfrute'))
@@ -103,19 +95,20 @@ class AdditionaldayForm
                     ->displayFormat('d M Y')
                     ->closeOnDateSelection()
                     ->locale('es')
-                    //->minDate(Carbon::now()->addMonths(-12)->startOfMonth())
+                    // ->minDate(Carbon::now()->addMonths(-12)->startOfMonth())
                     ->maxDate(Carbon::now()->addMonths(12)->endOfMonth())
-                    //deshabilitar los días ya registrados por el usuario seleccionado para disfrute, para eso hay que recuperar el valor del campo user_id y hacer una consulta a la base de datos para obtener los días de disfrute registrados por ese usuario y deshabilitarlos en el DatePicker
+                    // deshabilitar los días ya registrados por el usuario seleccionado para disfrute, para eso hay que recuperar el valor del campo user_id y hacer una consulta a la base de datos para obtener los días de disfrute registrados por ese usuario y deshabilitarlos en el DatePicker
                     ->disabledDates(function (Get $get) {
                         $userId = $get('user_id');
-                        if (!$userId) {
+                        if (! $userId) {
                             return [];
                         }
                         $disfrutes = Disfrute::where('user_id', $userId)->pluck('fecha_disfrute')->toArray();
+
                         return $disfrutes;
                     })
-                    ->visible(fn(Get $get) => $get('disfrute.status') !== StatusSolicitudes::Disponible)
-                    ->required(fn(Get $get) => in_array($get('disfrute.status'), [StatusSolicitudes::Solicitado, StatusSolicitudes::Aprobado, StatusSolicitudes::Rechazado]))
+                    ->visible(fn (Get $get) => $get('disfrute.status') !== StatusSolicitudes::Disponible)
+                    ->required(fn (Get $get) => in_array($get('disfrute.status'), [StatusSolicitudes::Solicitado, StatusSolicitudes::Aprobado, StatusSolicitudes::Rechazado]))
                     ->label(__('Fecha de disfrute')),
 
             ]);

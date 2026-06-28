@@ -2,10 +2,9 @@
 
 namespace App\Filament\App\Resources\Companydays\Actions;
 
-
-
 use App\Enum\StatusSolicitudes;
 use App\Models\User;
+use App\Notifications\NotificacionSolicitudCompanyday;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Filament\Actions\Action;
@@ -14,7 +13,6 @@ use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification as FacadesNotification;
-
 
 class SolicitarCompanyday extends Action
 {
@@ -25,12 +23,12 @@ class SolicitarCompanyday extends Action
         $this->hiddenLabel(true);
         $this->tooltip(__('Solicitar día'));
         $this->icon('far-calendar-plus');
-        //$this->icon(Heroicon::CalendarDays); --- IGNORE ---
+        // $this->icon(Heroicon::CalendarDays); --- IGNORE ---
         $this->color('primary');
         $this->modalHeading(__('Solicitar día'))
             ->modalDescription(__('Selecciona la fecha en la que deseas disfrutar tu día.'))
             ->modalWidth('md')
-            ->modalIcon(Heroicon::CalendarDays);;
+            ->modalIcon(Heroicon::CalendarDays);
         $this->schema([
             DatePicker::make('fecha_disfrute')
                 ->label(__('Fecha de disfrute'))
@@ -42,47 +40,43 @@ class SolicitarCompanyday extends Action
                 ->closeOnDateSelection()
                 ->disabledDates(function () {
                     $start = Carbon::now()->addYear(-10)->startOfMonth();
-                    $end   = Carbon::now();
+                    $end = Carbon::now();
 
                     $period = CarbonPeriod::create($start, $end);
                     $disabled = [];
 
                     foreach ($period as $date) {
-                        //desabilitar fechas anteriores a la actual
+                        // desabilitar fechas anteriores a la actual
                         if ($date->isPast()) {
                             $disabled[] = $date->translatedFormat('Y-m-d');
                         }
                     }
-                    //desabilitar fechas ya solicitadas
+                    // desabilitar fechas ya solicitadas
                     $diasSolicitados = Auth::user()->disfrutes()->get();
-
 
                     foreach ($diasSolicitados as $dia) {
 
                         $disabled[] = Carbon::parse($dia->fecha_disfrute)->translatedFormat('Y-m-d');
                     }
 
-
-
                     return $disabled;
                 }),
 
         ]);
-        //$this->requiresConfirmation();
+        // $this->requiresConfirmation();
 
         $this->action(function ($record, $data, $livewire) {
             $record->disfrute()->create(['fecha_disfrute' => $this->data['fecha_disfrute'], 'user_id' => $record->user_id, 'status' => StatusSolicitudes::Solicitado]);
 
             Notification::make()
                 ->title(__('Solicitud enviada'))
-                 ->icon('heroicon-o-document-text')
+                ->icon('heroicon-o-document-text')
 
                 ->success()
                 ->send();
-            //notificar al admin por correo
+            // notificar al admin por correo
 
-
-           $record->refresh();
+            $record->refresh();
             $admins = User::withoutGlobalScopes()->notifiable()->role('admin')->get();
             Notification::make(
 
@@ -91,9 +85,9 @@ class SolicitarCompanyday extends Action
                 ->body(__('new_companyday_requested', ['user' => $record->user->name, 'fecha_para_disfrute' => Carbon::parse($record->disfrute->fecha_disfrute)->translatedFormat('d F Y')]))
                 ->success()
                 ->sendToDatabase($admins);
-            FacadesNotification::send($admins, new \App\Notifications\NotificacionSolicitudCompanyday($record));
+            FacadesNotification::send($admins, new NotificacionSolicitudCompanyday($record));
 
-           $livewire->dispatch('refresh-sidebar');
+            $livewire->dispatch('refresh-sidebar');
         });
     }
 

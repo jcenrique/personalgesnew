@@ -16,12 +16,12 @@ class CategoriaelementoForm
                 TextInput::make('nombre_eu')
                     ->label(__('Nombre en Euskera'))
                     ->extraInputAttributes(['class' => 'uppercase'])
-                    ->dehydrateStateUsing(fn($state) => strtoupper($state))
+                    ->dehydrateStateUsing(fn ($state) => strtoupper($state))
                     ->required(),
                 TextInput::make('nombre_es')
-                ->label(__('Nombre en Castellano'))
+                    ->label(__('Nombre en Castellano'))
                     ->extraInputAttributes(['class' => 'uppercase'])
-                    ->dehydrateStateUsing(fn($state) => strtoupper($state))
+                    ->dehydrateStateUsing(fn ($state) => strtoupper($state))
                     ->required(),
                 Toggle::make('active')
                     ->label(__('Activo'))

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Additionaldays\Tables;
 use App\Enum\StatusSolicitudes;
 use App\Filament\Resources\Additionaldays\Actions\AprobarAdditionaldayAction;
 use App\Filament\Resources\Additionaldays\Actions\RechazarAdditionadayAction;
+use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -14,11 +15,10 @@ use Filament\Actions\RestoreAction;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AdditionaldaysTable
 {
@@ -27,6 +27,7 @@ class AdditionaldaysTable
         return $table
             ->poll(function ($livewire) {
                 $livewire->dispatch('refresh-sidebar');
+
                 return '10s';
             })
             ->defaultSort(function (Builder $query): Builder {
@@ -62,7 +63,6 @@ class AdditionaldaysTable
                     ->date('d F Y')
                     ->sortable(),
 
-
                 TextColumn::make(('deleted_at'))
                     ->label(__('Eliminado en'))
                     ->dateTime('d F Y')
@@ -82,14 +82,15 @@ class AdditionaldaysTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //filtro por año
+                // filtro por año
                 SelectFilter::make('year')
                     ->label(__('Año'))
                     ->options(function () {
-                        $years =  DB::table('additionaldays')->distinct()->orderBy('year', 'asc')->pluck('year', 'year')->toArray();
+                        $years = DB::table('additionaldays')->distinct()->orderBy('year', 'asc')->pluck('year', 'year')->toArray();
+
                         return $years;
                     })
-                    //por defecto año actual
+                    // por defecto año actual
                     ->default(date('Y'))
                     ->searchable()
                     ->placeholder(__('Selecciona un año')),
@@ -101,7 +102,7 @@ class AdditionaldaysTable
 
                         // Si es super_admin o admin, mostrar todos los usuarios
                         if ($user->hasRole('super_admin') || $user->hasRole('admin')) {
-                            return \App\Models\User::orderBy('name')->pluck('name', 'id')->toArray();
+                            return User::orderBy('name')->pluck('name', 'id')->toArray();
                         }
 
                         // Si NO es admin, obtener zonas del usuario autenticado directamente
@@ -110,7 +111,7 @@ class AdditionaldaysTable
                             ->toArray();
 
                         // Solo mostrar usuarios de esas zonas
-                        return \App\Models\User::whereHas('zonas', function (Builder $q) use ($zonaIds) {
+                        return User::whereHas('zonas', function (Builder $q) use ($zonaIds) {
                             $q->whereIn('id', $zonaIds);
                         })
                             ->orderBy('name')
@@ -119,26 +120,24 @@ class AdditionaldaysTable
                     })
                     ->searchable(),
 
-
-
             ])
             ->recordActions([
                 AprobarAdditionaldayAction::make('aprobar')
-                    ->visible(fn($record) => $record->disfrute?->status === StatusSolicitudes::Solicitado),
+                    ->visible(fn ($record) => $record->disfrute?->status === StatusSolicitudes::Solicitado),
                 RechazarAdditionadayAction::make('rechazar')
-                    ->visible(fn($record) => $record->disfrute?->status === StatusSolicitudes::Solicitado),
+                    ->visible(fn ($record) => $record->disfrute?->status === StatusSolicitudes::Solicitado),
                 EditAction::make()
-
 
                     ->mutateRecordDataUsing(function (array $data, $record) {
 
                         if ($record->disfrute) {
                             $data['disfrute']['fecha_disfrute'] = $record->disfrute->fecha_disfrute;
                             $data['disfrute']['status'] = $record->disfrute->status;
-                        }else{
+                        } else {
 
                             $data['disfrute']['status'] = StatusSolicitudes::Disponible;
                         }
+
                         return $data;
                     })
 
@@ -154,7 +153,7 @@ class AdditionaldaysTable
                         if (in_array($status, [
                             StatusSolicitudes::Solicitado,
                             StatusSolicitudes::Aprobado,
-                            StatusSolicitudes::Rechazado
+                            StatusSolicitudes::Rechazado,
                         ])) {
 
                             if ($disfrute) {
@@ -203,6 +202,4 @@ class AdditionaldaysTable
                 ]),
             ]);
     }
-
-
 }

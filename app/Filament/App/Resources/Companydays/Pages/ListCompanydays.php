@@ -21,7 +21,7 @@ class ListCompanydays extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-           // CreateAction::make(),
+            // CreateAction::make(),
         ];
     }
 
@@ -34,7 +34,7 @@ class ListCompanydays extends ListRecords
                 ->badgeColor(StatusSolicitudes::Disponible->getColor())
                 ->badge(function ($livewire) {
 
-                     $query = Companyday::where ('user_id', Auth::id());
+                    $query = Companyday::where('user_id', Auth::id());
 
                     $count = $query
                         ->doesntHave('disfrute')
@@ -52,12 +52,11 @@ class ListCompanydays extends ListRecords
                 ->badgeColor(StatusSolicitudes::Solicitado->getColor())
                 ->badge(function ($livewire) {
 
-                    $query = Companyday::where ('user_id', Auth::id());
-
+                    $query = Companyday::where('user_id', Auth::id());
 
                     $count = $query
                         ->whereHas('disfrute', function (Builder $query) {
-                            //dd($query->where('status', StatusSolicitudes::Solicitado));
+                            // dd($query->where('status', StatusSolicitudes::Solicitado));
                             $query->where('status', StatusSolicitudes::Solicitado);
                         })
                         ->get()->count();
@@ -67,22 +66,21 @@ class ListCompanydays extends ListRecords
                 ->query(function (Builder $query) {
                     $query
                         ->whereHas('disfrute', function (Builder $query) {
-                            //dd($query->where('status', StatusSolicitudes::Solicitado));
+                            // dd($query->where('status', StatusSolicitudes::Solicitado));
                             $query->where('status', StatusSolicitudes::Solicitado);
                         })
                         ->get();
                 }),
 
-
             'approved' => Tab::make()->label(__('Aprobados'))->icon(Heroicon::CheckBadge)
                 ->badgeColor(StatusSolicitudes::Aprobado->getColor())
                 ->badge(function ($livewire) {
 
-                      $query = Companyday::where ('user_id', Auth::id());
+                    $query = Companyday::where('user_id', Auth::id());
 
                     $count = $query
                         ->whereHas('disfrute', function (Builder $query) {
-                            //dd($query->where('status', StatusSolicitudes::Solicitado));
+                            // dd($query->where('status', StatusSolicitudes::Solicitado));
                             $query->where('status', StatusSolicitudes::Aprobado);
                         })
                         ->get()->count();
@@ -92,7 +90,7 @@ class ListCompanydays extends ListRecords
                 ->query(function (Builder $query) {
                     $query
                         ->whereHas('disfrute', function (Builder $query) {
-                            //dd($query->where('status', StatusSolicitudes::Solicitado));
+                            // dd($query->where('status', StatusSolicitudes::Solicitado));
                             $query->where('status', StatusSolicitudes::Aprobado);
                         })
                         ->get();
@@ -102,25 +100,18 @@ class ListCompanydays extends ListRecords
                 ->badgeColor('primary')
                 ->badge(function ($livewire) {
 
-                    $query = Companyday::where ('user_id', Auth::id());
-
-
-
+                    $query = Companyday::where('user_id', Auth::id());
 
                     $count = $query->get()->count();
 
-
                     return $count > 0 ? $count : null;
                 })
-                ->modifyQueryUsing(function ($query) {
-                    $query;
-                }),
-
+                ->modifyQueryUsing(function ($query) {}),
 
         ];
     }
 
-    public function getDefaultActiveTab(): string | int | null
+    public function getDefaultActiveTab(): string|int|null
     {
         return 'available';
     }

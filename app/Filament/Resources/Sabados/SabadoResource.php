@@ -8,6 +8,7 @@ use App\Filament\Resources\Sabados\Actions\RechazarSabadoAction;
 use App\Filament\Resources\Sabados\Pages\ManageSabados;
 use App\Models\Disfrute;
 use App\Models\Sabado;
+use App\Models\User;
 use BackedEnum;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -23,12 +24,10 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use UnitEnum;
 
@@ -40,17 +39,17 @@ class SabadoResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'user.name';
 
-
     public static function getNavigationGroup(): string|UnitEnum|null
     {
         return __('Gestión');
     }
 
-    //funciones de etiquetas singular y plural para el recurso
+    // funciones de etiquetas singular y plural para el recurso
     public static function getLabel(): string
     {
         return __('Sábado');
     }
+
     public static function getPluralLabel(): string
     {
         return __('Sábados');
@@ -59,28 +58,25 @@ class SabadoResource extends Resource
     // funcion para que aparezca el badge del numero de sabados disponibles
     public static function getNavigationBadge(): ?string
     {
-        //obtener los dias adicionales del usuario para el año actual
-        $sabados_totales =  static::getEloquentQuery()->count();
+        // obtener los dias adicionales del usuario para el año actual
+        $sabados_totales = static::getEloquentQuery()->count();
 
-
-
-        //contar los días adicionales  se han solicitado disfrutar
-        $sabados_disfrutados =  static::getEloquentQuery()->whereHas('disfrute', function (Builder $query) {
+        // contar los días adicionales  se han solicitado disfrutar
+        $sabados_disfrutados = static::getEloquentQuery()->whereHas('disfrute', function (Builder $query) {
             $query->where('status', StatusSolicitudes::Aprobado);
         })->count();
 
         $sabados_disponibles = $sabados_totales - $sabados_disfrutados;
 
-
-
-
-        return  $sabados_disponibles;
+        return $sabados_disponibles;
     }
-    //badge color para el numero de usuarios
+
+    // badge color para el numero de usuarios
     public static function getNavigationBadgeColor(): ?string
     {
         return 'success';
     }
+
     public static function getNavigationBadgeTooltip(): ?string
     {
         return __('Número de sábados totales disponibles');
@@ -93,9 +89,9 @@ class SabadoResource extends Resource
                 Select::make('user_id')
                     ->label(__('Usuario'))
                     ->searchable()
-                    ->options(\App\Models\User::pluck('name', 'id'))
-                    ->disabled(fn($operation) => $operation === 'edit')
-                    //cuando se seleccione una opcion actualizar DatePicker para deshabilitar los sábados ya registrados por ese usuario
+                    ->options(User::pluck('name', 'id'))
+                    ->disabled(fn ($operation) => $operation === 'edit')
+                    // cuando se seleccione una opcion actualizar DatePicker para deshabilitar los sábados ya registrados por ese usuario
                     ->reactive()
                     ->required(),
 
@@ -111,19 +107,20 @@ class SabadoResource extends Resource
                     ->disabledDates(function (Get $get) {
                         // Rango razonable para escoger fechas (por ejemplo 1 año)
                         $start = Carbon::now()->addMonths(-12)->startOfMonth();
-                        $end   = Carbon::now()->addMonths(12)->endOfMonth();
+                        $end = Carbon::now()->addMonths(12)->endOfMonth();
                         $period = CarbonPeriod::create($start, $end);
                         $disabled = [];
 
                         foreach ($period as $date) {
-                            if (!$date->isSaturday()) {    // ❌ deshabilitar todo lo que NO sea sábado
+                            if (! $date->isSaturday()) {    // ❌ deshabilitar todo lo que NO sea sábado
                                 $disabled[] = $date->translatedFormat('Y-m-d');
                             }
-                            //también  deshabilitar sábados ya registrados por el usuario
+                            // también  deshabilitar sábados ya registrados por el usuario
                             if ($date->isSaturday() && Sabado::where('user_id', $get('user_id'))->where('sabado_trabajado', $date->translatedFormat('Y-m-d'))->exists()) {
                                 $disabled[] = $date->translatedFormat('Y-m-d');
                             }
                         }
+
                         return $disabled;
                     })
 
@@ -133,7 +130,7 @@ class SabadoResource extends Resource
                     ->label(__('Estado'))
                     ->options(StatusSolicitudes::class)
                     ->default('disponible')
-                    ->visible(fn($operation) => $operation !== 'create')
+                    ->visible(fn ($operation) => $operation !== 'create')
                     ->required()
                     // si el estado cambia a disponible borrar el campo  fecha de disfrute,
 
@@ -143,10 +140,9 @@ class SabadoResource extends Resource
 
                             $set('fecha_disfrute', null);
                         } elseif (in_array($state, [StatusSolicitudes::Solicitado, StatusSolicitudes::Aprobado])) {
-                            //recuperar el valor del campo fecha_disfrute del registro
+                            // recuperar el valor del campo fecha_disfrute del registro
                             $set('fecha_disfrute', $record->fecha_disfrute);
-                        } else if ($state === StatusSolicitudes::Rechazado) {
-
+                        } elseif ($state === StatusSolicitudes::Rechazado) {
 
                             $set('fecha_disfrute', $record->fecha_disfrute);
                         }
@@ -165,13 +161,14 @@ class SabadoResource extends Resource
 
                     ->disabledDates(function (Get $get) {
                         $userId = $get('user_id');
-                        if (!$userId) {
+                        if (! $userId) {
                             return [];
                         }
                         $disfrutes = Disfrute::where('user_id', $userId)->pluck('fecha_disfrute')->toArray();
+
                         return $disfrutes;
                     })
-                    ->visible(fn($operation) => $operation !== 'create')
+                    ->visible(fn ($operation) => $operation !== 'create')
                     ->native(false)
                     ->format('Y-m-d')
                     ->displayFormat('d M Y')
@@ -179,10 +176,9 @@ class SabadoResource extends Resource
                     ->locale('es')
                     ->minDate(Carbon::now()->addMonths(-12)->startOfMonth())
                     ->maxDate(Carbon::now()->addMonths(12)->endOfMonth())
-                    ->visible(fn(Get $get) => $get('disfrute.status') !== StatusSolicitudes::Disponible)
-                    ->required(fn(Get $get) => in_array($get('disfrute.status'), [StatusSolicitudes::Solicitado, StatusSolicitudes::Aprobado, StatusSolicitudes::Rechazado]))
+                    ->visible(fn (Get $get) => $get('disfrute.status') !== StatusSolicitudes::Disponible)
+                    ->required(fn (Get $get) => in_array($get('disfrute.status'), [StatusSolicitudes::Solicitado, StatusSolicitudes::Aprobado, StatusSolicitudes::Rechazado]))
                     ->label(__('Fecha de disfrute')),
-
 
             ]);
     }
@@ -193,13 +189,12 @@ class SabadoResource extends Resource
             ->recordTitleAttribute('user.name')
             ->poll(function ($livewire) {
 
-
                 $livewire->dispatch('refresh-sidebar');
+
                 return '10s';
             })
             ->defaultSort('sabado_trabajado', 'asc')
             ->columns([
-
 
                 TextColumn::make('user.name')
                     ->label(__('Usuario'))
@@ -227,8 +222,6 @@ class SabadoResource extends Resource
                     ->date('d F Y')
                     ->sortable(),
 
-
-
                 TextColumn::make('deleted_at')
                     ->label(__('Eliminado en'))
                     ->dateTime()
@@ -249,23 +242,23 @@ class SabadoResource extends Resource
             ])
             ->filters([
 
-                //crear un filtro para usuarios
+                // crear un filtro para usuarios
                 SelectFilter::make('user_id')
                     ->label(__('Usuario'))
-                    ->options(\App\Models\User::pluck('name', 'id'))
+                    ->options(User::pluck('name', 'id'))
                     ->searchable(),
             ])
             ->recordActions([
                 AprobarSabadoAction::make('aprobar')
-                    ->visible(fn($record) => $record->disfrute?->status === StatusSolicitudes::Solicitado),
+                    ->visible(fn ($record) => $record->disfrute?->status === StatusSolicitudes::Solicitado),
 
                 RechazarSabadoAction::make('rechazar')
-                    ->visible(fn($record) => $record->disfrute?->status === StatusSolicitudes::Solicitado),
+                    ->visible(fn ($record) => $record->disfrute?->status === StatusSolicitudes::Solicitado),
 
                 EditAction::make()
                     ->hiddenLabel(true)
-                    ->recordTitle(function($record){
-                        return $record->user->name . ' - ' . $record->sabado_trabajado->translatedFormat('d F Y');
+                    ->recordTitle(function ($record) {
+                        return $record->user->name.' - '.$record->sabado_trabajado->translatedFormat('d F Y');
                     })
                     ->mutateRecordDataUsing(function (array $data, $record) {
 
@@ -276,6 +269,7 @@ class SabadoResource extends Resource
 
                             $data['disfrute']['status'] = StatusSolicitudes::Disponible;
                         }
+
                         return $data;
                     })
 
@@ -289,7 +283,7 @@ class SabadoResource extends Resource
                         if (in_array($status, [
                             StatusSolicitudes::Solicitado,
                             StatusSolicitudes::Aprobado,
-                            StatusSolicitudes::Rechazado
+                            StatusSolicitudes::Rechazado,
                         ])) {
 
                             if ($disfrute) {
@@ -323,7 +317,7 @@ class SabadoResource extends Resource
 
                 DeleteAction::make()
                     ->hiddenLabel(true)
-                    //modificar el titulo y descripcion del modal de confirmación para que quede más claro que se va a eliminar una solicitud de sábado y no un registro cualquiera
+                    // modificar el titulo y descripcion del modal de confirmación para que quede más claro que se va a eliminar una solicitud de sábado y no un registro cualquiera
                     ->modalHeading(__('¿Eliminar  sábado?'))
                     ->modalDescription(__('¿Estás seguro de que deseas eliminar el sábado? Esta acción no se puede deshacer, pero puedes restaurarla desde la pestaña de eliminados si es necesario.'))
                     ->tooltip(__('Delete')),
@@ -347,7 +341,7 @@ class SabadoResource extends Resource
         ];
     }
 
-      public static function getEloquentQuery(): Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
             ->whereHas('user.residencias', function (Builder $query) {
@@ -360,6 +354,4 @@ class SabadoResource extends Resource
             })
             ->with('disfrute');
     }
-
-
 }

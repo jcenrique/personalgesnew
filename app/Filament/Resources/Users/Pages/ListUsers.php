@@ -10,14 +10,14 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ListUsers extends ListRecords
 {
+    use HasResizableColumn;
 
-use HasResizableColumn;
     protected static string $resource = UserResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            //CreateAction::make(),
+            // CreateAction::make(),
         ];
     }
 

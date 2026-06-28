@@ -7,13 +7,11 @@ use Asmit\ResizedColumn\HasResizableColumn;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
-
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Forms;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 
 class ResidenciasRelationManager extends RelationManager
@@ -31,11 +29,10 @@ class ResidenciasRelationManager extends RelationManager
         return __('Residencia');
     }
 
-    protected function getTableHeading(): string | Htmlable | null
+    protected function getTableHeading(): string|Htmlable|null
     {
         return __('Residencias');
     }
-
 
     public function form(Schema $schema): Schema
     {
@@ -43,13 +40,11 @@ class ResidenciasRelationManager extends RelationManager
             ->components([
                 TextInput::make('name')
                     ->extraInputAttributes(['class' => 'uppercase'])
-                    ->dehydrateStateUsing(fn($state) => strtoupper($state))
+                    ->dehydrateStateUsing(fn ($state) => strtoupper($state))
                     ->required(),
 
             ]);
     }
-
-
 
     public function table(Table $table): Table
     {
@@ -74,7 +69,7 @@ class ResidenciasRelationManager extends RelationManager
                     ->tooltip(__('Edit')),
             ])
             ->headerActions([
-                CreateAction::make()
+                CreateAction::make(),
 
             ]);
     }

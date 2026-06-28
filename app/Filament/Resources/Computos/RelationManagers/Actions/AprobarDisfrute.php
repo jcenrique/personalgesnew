@@ -3,17 +3,9 @@
 namespace App\Filament\Resources\Computos\RelationManagers\Actions;
 
 use App\Enum\StatusSolicitudes;
-use App\Models\Sabado;
-use App\Models\User;
-use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Filament\Actions\Action;
-use Filament\Forms\Components\DatePicker;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Notification as FacadesNotification;
-
 
 class AprobarDisfrute extends Action
 {
@@ -29,7 +21,7 @@ class AprobarDisfrute extends Action
             ->modalDescription(__('Puedes aprobar para que el usuario pueda disfrutar de su día de descanso'))
             ->modalWidth('md')
             ->modalIcon(Heroicon::CalendarDays);
-        //solo hay que aprobar el sábado trabajado, no es necesario seleccionar la fecha porque ya está registrada en la solicitud, por lo que se puede mostrar como información en el modal y cambiar el estado a aprobado al confirmar la acción
+        // solo hay que aprobar el sábado trabajado, no es necesario seleccionar la fecha porque ya está registrada en la solicitud, por lo que se puede mostrar como información en el modal y cambiar el estado a aprobado al confirmar la acción
         $this->schema([
             // Aquí puedes agregar campos adicionales para la solicitud, si es necesario
         ]);
@@ -38,10 +30,9 @@ class AprobarDisfrute extends Action
 
             $record->status = StatusSolicitudes::Aprobado;
 
-
             $record->save();
             $user = $record->user; // Obtener el usuario asociado al sábado trabajado
-            //notifiacar al usuario que su sábado trabajado ha sido aprobado
+            // notifiacar al usuario que su sábado trabajado ha sido aprobado
             //    $user->notify(new \App\Notifications\NotificacionAprobarSabado($record));
 
             Notification::make()
@@ -53,7 +44,7 @@ class AprobarDisfrute extends Action
                 ]))
                 ->success()
                 ->send();
-            //notificar por DB al usuario para que pueda ver la notificación en su panel de usuario
+            // notificar por DB al usuario para que pueda ver la notificación en su panel de usuario
             Notification::make()
                 ->title(__('Día de computo aprobado'))
                 ->body(__('El día de computo ha sido aprobado. El usuario podrá disfrutar de su día de descanso el :fecha_disfrute.', [
@@ -64,7 +55,7 @@ class AprobarDisfrute extends Action
                 ->sendToDatabase($user);
 
             $record->refresh();
-            //actualizar badges de slider de computo
+            // actualizar badges de slider de computo
             $livewire->dispatch('refresh-sidebar');
         });
     }

@@ -2,12 +2,10 @@
 
 namespace App\Filament\Resources\Computos\Schemas;
 
-use App\Models\Computo;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-
 
 class ComputoInfolist
 {
@@ -41,7 +39,7 @@ class ComputoInfolist
                                     ->formatStateUsing(function ($record) {
                                         $minutos = $record->disponible;
                                         $horas = intdiv($minutos, 60);
-                                        $mins  = $minutos % 60;
+                                        $mins = $minutos % 60;
 
                                         return sprintf('%02d:%02d', $horas, $mins);
                                     }),
@@ -53,12 +51,11 @@ class ComputoInfolist
                                     ->formatStateUsing(function ($record) {
                                         $min_solicitados = $record->disfrutes()->sum('minutos_solicitados');
                                         $horas = intdiv($min_solicitados, 60);
-                                        $mins  = $min_solicitados % 60;
+                                        $mins = $min_solicitados % 60;
 
                                         return sprintf('%02d:%02d', $horas, $mins);
                                     }),
                             ]),
-
 
                         TextEntry::make('disponible')
                             ->extraAttributes(['class' => 'text-lg font-bold'])
@@ -81,12 +78,12 @@ class ComputoInfolist
                                 $restantes = $min_disponibles - $min_solicitados;
                                 $restantes_formateados = sprintf('%02d:%02d', intdiv(abs($restantes), 60), abs($restantes) % 60);
                                 if ($restantes < 0) {
-                                    $restantes_formateados = '-' . $restantes_formateados;
+                                    $restantes_formateados = '-'.$restantes_formateados;
                                 }
 
                                 return $restantes_formateados;
                             }),
-                    ])
+                    ]),
 
             ]);
     }

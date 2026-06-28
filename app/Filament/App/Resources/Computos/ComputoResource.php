@@ -5,8 +5,8 @@ namespace App\Filament\App\Resources\Computos;
 use App\Filament\App\Resources\Computos\Pages\ListComputos;
 use App\Filament\App\Resources\Computos\Pages\ViewComputo;
 use App\Filament\App\Resources\Computos\Schemas\ComputoForm;
-use App\Filament\App\Resources\Computos\Tables\ComputosTable;
 use App\Filament\App\Resources\Computos\Schemas\ComputoInfolist;
+use App\Filament\App\Resources\Computos\Tables\ComputosTable;
 use App\Models\Computo;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Auth;
 use UnitEnum;
 
 class ComputoResource extends Resource
-
 {
     protected static ?string $model = Computo::class;
 
@@ -26,31 +25,31 @@ class ComputoResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'year';
 
-    //establecer el orden en el menu
+    // establecer el orden en el menu
     protected static ?int $navigationSort = 1;
-
-
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
         return __('Gestión');
     }
 
-    //funciones de etiquetas singular y plural para el recurso
+    // funciones de etiquetas singular y plural para el recurso
     public static function getLabel(): string
     {
         return __('Cómputo');
     }
+
     public static function getPluralLabel(): string
     {
         return __('Cómputos');
     }
+
     // funcion para que aparezca el badge del numero de sabados disponibles
     public static function getNavigationBadge(): ?string
     {
         $modelo_id = Computo::where('user_id', Auth::id())->where('year', now()->year)->first()?->id;
 
-        if (!$modelo_id) {
+        if (! $modelo_id) {
             return sprintf('%02d:%02d', 0, 0);
         }
         $computo = Computo::where('id', $modelo_id)->where('user_id', Auth::id())->where('year', now()->year)->first();
@@ -60,30 +59,29 @@ class ComputoResource extends Resource
             $minutos_consumidos = 0;
         }
 
-
         $minutos = $computo->disponible - $minutos_consumidos;
-        //si el computo es negativo poner el signo menos por delante en el texto de devolución de horas
+        // si el computo es negativo poner el signo menos por delante en el texto de devolución de horas
         if ($minutos < 0) {
             $minutos = abs($minutos);
             $horas = intdiv($minutos, 60);
-            $mins  = $minutos % 60;
+            $mins = $minutos % 60;
 
-            return '-' . sprintf('%02d:%02d', $horas, $mins);
+            return '-'.sprintf('%02d:%02d', $horas, $mins);
         }
-
 
         $horas = intdiv($minutos, 60);
 
-        $mins  = $minutos % 60;
+        $mins = $minutos % 60;
 
         return sprintf('%02d:%02d', $horas, $mins);
     }
-    //badge color para el numero de usuarios
+
+    // badge color para el numero de usuarios
     public static function getNavigationBadgeColor(): ?string
     {
-        //si el numero de minutos disponibles es negativo, el badge debe ser de color danger, si es positivo debe ser success y si es cero warning
+        // si el numero de minutos disponibles es negativo, el badge debe ser de color danger, si es positivo debe ser success y si es cero warning
         $modelo_id = Computo::where('user_id', Auth::id())->where('year', now()->year)->first()?->id;
-        if (!$modelo_id) {
+        if (! $modelo_id) {
             return 'success';
         }
         $computo = Computo::find($modelo_id)->first();
@@ -96,8 +94,6 @@ class ComputoResource extends Resource
         if ($minutos < 0) {
             return 'danger';
         } elseif ($minutos > 0) {
-
-
 
             return 'success';
         } else {
@@ -128,7 +124,7 @@ class ComputoResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\DisfrutesRelationManager::class
+            RelationManagers\DisfrutesRelationManager::class,
         ];
     }
 
@@ -136,7 +132,7 @@ class ComputoResource extends Resource
     {
         return [
             'index' => ListComputos::route('/'),
-            //'create' => CreateComputo::route('/create'),
+            // 'create' => CreateComputo::route('/create'),
             // 'edit' => EditComputo::route('/{record}/edit'),
             'view' => ViewComputo::route('/{record}/view'),
         ];

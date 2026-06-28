@@ -9,7 +9,6 @@ use App\Filament\Resources\Courses\RelationManagers\TrainingactionsRelationManag
 use App\Filament\Resources\Courses\Schemas\CourseForm;
 use App\Filament\Resources\Courses\Tables\CoursesTable;
 use App\Models\Course;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,24 +17,23 @@ use UnitEnum;
 
 class CourseResource extends Resource
 {
-     protected static ?string $model = Course::class;
+    protected static ?string $model = Course::class;
 
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 
-
-
     protected static ?string $recordTitleAttribute = 'name';
 
-     public static function getNavigationGroup(): string|UnitEnum|null
+    public static function getNavigationGroup(): string|UnitEnum|null
     {
         return __('Formación');
     }
 
-     //funciones de etiquetas singular y plural para el recurso
+    // funciones de etiquetas singular y plural para el recurso
     public static function getLabel(): string
     {
         return __('Curso');
     }
+
     public static function getPluralLabel(): string
     {
         return __('Cursos');
@@ -46,14 +44,15 @@ class CourseResource extends Resource
     {
         $total_cursos = Course::count();
 
-
-        return  $total_cursos;
+        return $total_cursos;
     }
-    //badge color para el numero de usuarios
+
+    // badge color para el numero de usuarios
     public static function getNavigationBadgeColor(): ?string
     {
         return 'success';
     }
+
     public static function form(Schema $schema): Schema
     {
         return CourseForm::configure($schema);

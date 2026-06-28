@@ -10,6 +10,7 @@ use Filament\Resources\Pages\ListRecords;
 class ListZonas extends ListRecords
 {
     use HasResizableColumn;
+
     protected static string $resource = ZonaResource::class;
 
     protected function getHeaderActions(): array

@@ -27,19 +27,19 @@ class BienMalColumn extends Column implements HasEmbeddedView
                 $bien = '';
                 $mal = '';
             }
-            ?>
+        ?>
 
                 <div class="bienmal-green">
                     <?= e($bien) ?>
                 </div>
                 <div>
                     <?php
-                    if ($bien !== '' && $mal !== '') {
-                        echo '/';
-                    } else {
-                        echo __('No procede');
-                    }
-                    ?>
+                if ($bien !== '' && $mal !== '') {
+                    echo '/';
+                } else {
+                    echo __('No procede');
+                }
+        ?>
                 </div>
                 <div class="bienmal-red">
                     <?= e($mal) ?>

@@ -16,15 +16,17 @@ class CreateInspeccion extends CreateRecord
     {
         $action = parent::getCreateAnotherFormAction();
         $action->hidden(true);
+
         return $action;
     }
 
-     public  function afterCreate(): void
+    public function afterCreate(): void
     {
         // ❗ Si es inspección especial → NO crear elementos
         if ($this->record->type === 'especial') {
-            //elimian los resultados que se hayan creado anteiromente
+            // elimian los resultados que se hayan creado anteiromente
             $this->record->resultados()->delete();
+
             return;
         }
 
@@ -46,20 +48,17 @@ class CreateInspeccion extends CreateRecord
         }
     }
 
-
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-
 
         //
         if (
             $data['type'] === 'especial'
-            && (!empty($data['user_id_1'])
-                || !empty($data['user_id_2']))
+            && (! empty($data['user_id_1'])
+                || ! empty($data['user_id_2']))
         ) {
             return $data;
         } elseif ($data['type'] === 'especial') {
-
 
             $this->form->addError('user_id_1', 'Debe indicar JS o TR/TRH');
             $this->form->addError('user_id_2', 'Debe indicar JS o TR/TRH');
@@ -68,24 +67,21 @@ class CreateInspeccion extends CreateRecord
 
         }
 
-
         if (
             $data['type'] === 'periodica'
-            && (!empty($data['user_id_1'])
-                && !empty($data['user_id_2']))
+            && (! empty($data['user_id_1'])
+                && ! empty($data['user_id_2']))
         ) {
 
             return $data;
         } elseif ($data['type'] === 'periodica') {
 
-
             $this->form->addError('user_id_1', 'Debe indicar JS o TR/TRH');
             $this->form->addError('user_id_2', 'Debe indicar JS o TR/TRH');
 
             $this->halt(); //
 
         }
-
 
         return $data;
     }

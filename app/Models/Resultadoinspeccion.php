@@ -12,7 +12,7 @@ class Resultadoinspeccion extends Model
         'inspeccion_id',
         'elementoinspeccion_id',
         'resultado',
-        'observacion'
+        'observacion',
 
     ];
 

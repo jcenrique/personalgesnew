@@ -2,13 +2,11 @@
 
 namespace App\Filament\Actions;
 
-use App\Notifications\NotificacionRechazarAdditionalday;
 use App\Notifications\NotificacionRechazarDia;
-use Carbon\Carbon;
 use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
-use Filament\Forms\Components\TextInput;
 
 class RechazarDisfruteAction extends Action
 {
@@ -24,29 +22,27 @@ class RechazarDisfruteAction extends Action
             ->modalDescription(__('Indique el motivo de rechazo.'))
             ->modalWidth('md')
             ->modalIcon(Heroicon::CalendarDays);
-        //solo hay que aprobar el sábado trabajado, no es necesario seleccionar la fecha porque ya está registrada en la solicitud, por lo que se puede mostrar como información en el modal y cambiar el estado a aprobado al confirmar la acción
+        // solo hay que aprobar el sábado trabajado, no es necesario seleccionar la fecha porque ya está registrada en la solicitud, por lo que se puede mostrar como información en el modal y cambiar el estado a aprobado al confirmar la acción
         $this->schema([
             TextInput::make('razon')
                 ->label(__('Motivo rechazo'))
-                ->required()
+                ->required(),
             // Aquí puedes agregar campos adicionales para la solicitud, si es necesario
         ]);
         $this->action(function ($record, $data, $livewire) {
 
             $recurso = $record->disfrutable()->first();
-            //guardar el motivo de rechazo en la tabla de rechazos utilizasndo la relación entre rechazo y sábado, creando un nuevo registro de rechazo asociado al sábado trabajado que se está rechazando
+            // guardar el motivo de rechazo en la tabla de rechazos utilizasndo la relación entre rechazo y sábado, creando un nuevo registro de rechazo asociado al sábado trabajado que se está rechazando
             $rechazo = $recurso->rechazos()->create([
                 'user_id' => $record->user_id,
                 'razon' => $data['razon'],
                 'fecha_disfrute' => $record->fecha_disfrute, // Guardar la fecha de disfrute asociada al rechazo
             ]);
 
-
-
             $user = $record->user; // Obtener el usuario asociado al sábado trabajado
             $record->delete();
 
-            //notifiacar al usuario que su sábado trabajado ha sido aprobado
+            // notifiacar al usuario que su sábado trabajado ha sido aprobado
             $user->notify(new NotificacionRechazarDia($record, $rechazo));
 
             Notification::make()
@@ -57,7 +53,7 @@ class RechazarDisfruteAction extends Action
                 ]))
                 ->danger()
                 ->send();
-            //notificar por DB al usuario para que pueda ver la notificación en su panel de usuario
+            // notificar por DB al usuario para que pueda ver la notificación en su panel de usuario
             Notification::make()
                 ->title(__('Día solicitado rechazado'))
                 ->body(__('El día solicitado para el :fecha_disfrute ha sido rechazado.', [

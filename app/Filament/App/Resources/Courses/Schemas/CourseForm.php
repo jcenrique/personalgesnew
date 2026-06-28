@@ -2,8 +2,8 @@
 
 namespace App\Filament\App\Resources\Courses\Schemas;
 
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
@@ -17,10 +17,10 @@ class CourseForm
                     ->label(_('Name'))
                     ->required(),
                 Textarea::make('description')
-                     ->label(_('Descripción'))
+                    ->label(_('Descripción'))
                     ->columnSpanFull(),
                 TextInput::make('duration_hours')
-                    
+
                     ->numeric(),
                 Toggle::make('requires_renewal')
                     ->required(),

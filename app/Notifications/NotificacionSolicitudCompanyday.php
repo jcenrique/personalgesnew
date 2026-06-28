@@ -2,10 +2,8 @@
 
 namespace App\Notifications;
 
-use App\Models\Additionalday;
 use App\Models\Companyday;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -13,17 +11,16 @@ class NotificacionSolicitudCompanyday extends Notification
 {
     use Queueable;
 
-        protected $companyday;
+    protected $companyday;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct( Companyday $companyday)
+    public function __construct(Companyday $companyday)
     {
         $this->companyday = $companyday;
     }
-        //
-
+    //
 
     /**
      * Get the notification's delivery channels.
@@ -42,18 +39,18 @@ class NotificacionSolicitudCompanyday extends Notification
     {
 
         return (new MailMessage)
-           ->subject(__('Nueva solicitud de día'))
+            ->subject(__('Nueva solicitud de día'))
             ->line(__('El usuario :name ha solicitado un día para disfrutar de un día de descanso el :fecha_disfrute.', [
                 'name' => $this->companyday->user->name,
 
                 'fecha_disfrute' => $this->companyday->disfrute->fecha_disfrute->translatedFormat('d F Y'),
             ]))
-            //la accion debe redirigir al panel de administración de sábados pendientes de aprobación para revisar la solicitud
+            // la accion debe redirigir al panel de administración de sábados pendientes de aprobación para revisar la solicitud
             ->action(__('Aprobar día'), url('admin/companydays/?tab=requested'))
             ->line(__('Gracias por usar nuestra aplicación!'))
             ->markdown('vendor.notifications.email', [
-            'notifiable' => $notifiable,
-        ]);
+                'notifiable' => $notifiable,
+            ]);
     }
 
     /**

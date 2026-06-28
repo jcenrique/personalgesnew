@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Inspecciones\Tables;
 
 use App\Filament\Tables\Columns\BienMalColumn;
 use App\Models\User;
+use App\Models\Zona;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -39,6 +40,7 @@ class InspeccionesTable
                         } else {
                             return __('Especial');
                         }
+
                         return '';
                     }),
                 TextColumn::make('estacion.zona.name')
@@ -66,12 +68,11 @@ class InspeccionesTable
                         $user = User::find($record->user_id_2);
                         $roles = $user->roles()
                             ->pluck('name')
-                            ->map(fn($role) => str_replace('_', ' ', ucwords($role)))
+                            ->map(fn ($role) => str_replace('_', ' ', ucwords($role)))
                             ->join(', ');
 
                         return $roles;
                     }),
-
 
                 BienMalColumn::make('resultados_ok_ko')
                     ->label(__('Resultados bien/mal'))
@@ -82,19 +83,20 @@ class InspeccionesTable
 
                         $count_ok = $record->resultados->where('resultado', 1)->count();
                         $count_ko = $record->resultados->where('resultado', 0)->count();
-                        return $count_ok . ' / ' . $count_ko;
+
+                        return $count_ok.' / '.$count_ko;
                     }),
 
             ])
             ->filters([
-                //filtra por zona, pero el filtro tiene que ser un select con las zonas disponibles
-                //el filtro debe mostrar las zonas disponibles y al seleccionar una zona, debe mostrar solo las inspecciones de las estaciones que pertenecen a esa zona
+                // filtra por zona, pero el filtro tiene que ser un select con las zonas disponibles
+                // el filtro debe mostrar las zonas disponibles y al seleccionar una zona, debe mostrar solo las inspecciones de las estaciones que pertenecen a esa zona
 
                 SelectFilter::make('estaciones.zona_id')
                     ->label(__('Zona'))
                     ->options(function () {
 
-                        return \App\Models\Zona::with('estaciones')->orderBy('name')->get()->pluck('name', 'id');
+                        return Zona::with('estaciones')->orderBy('name')->get()->pluck('name', 'id');
                     })
                     ->query(function (Builder $query, array $data) {
                         if (! $data['value']) {
@@ -111,7 +113,7 @@ class InspeccionesTable
                     ->label(__('Tipo Inspeción'))
                     ->options([
                         'periodica' => __('Periódica'),
-                        'especial' => __('Especial')
+                        'especial' => __('Especial'),
                     ])
                     ->default('periodica'),
                 SelectFilter::make('cuatrimestre')
@@ -129,7 +131,6 @@ class InspeccionesTable
                                 "{$year}-1" => __('1º Cuatrimestre'),
                                 "{$year}-2" => __('2º Cuatrimestre'),
                                 "{$year}-3" => __('3º Cuatrimestre'),
-
 
                             ];
                         }
@@ -173,7 +174,7 @@ class InspeccionesTable
                     ->color('info')
                     ->tooltip('Descargar PDF')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn($record) => route('inspecciones.export-pdf', ['inspeccion' => $record]))
+                    ->url(fn ($record) => route('inspecciones.export-pdf', ['inspeccion' => $record]))
                     ->openUrlInNewTab(),
 
                 Action::make('pdfEspecial')
@@ -184,8 +185,8 @@ class InspeccionesTable
                         return $record->type == 'periodica';
                     })
                     ->icon('heroicon-o-document-arrow-down')
-                    ->url(fn($record) => route('inspecciones.export-especial-pdf', ['inspeccion' => $record]))
-                    ->openUrlInNewTab()
+                    ->url(fn ($record) => route('inspecciones.export-especial-pdf', ['inspeccion' => $record]))
+                    ->openUrlInNewTab(),
             ])
             ->toolbarActions([
                 // BulkActionGroup::make([

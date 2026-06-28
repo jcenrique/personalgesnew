@@ -4,6 +4,7 @@ namespace App\Filament\App\Resources\Inspecciones\Tables;
 
 use App\Filament\Tables\Columns\BienMalColumn;
 use App\Models\User;
+use App\Models\Zona;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -61,33 +62,34 @@ class InspeccionTable
                         $user = User::find($record->user_id_2);
                         $roles = $user->roles()
                             ->pluck('name')
-                            ->map(fn($role) => str_replace('_', ' ', ucwords($role)))
+                            ->map(fn ($role) => str_replace('_', ' ', ucwords($role)))
                             ->join(', ');
 
                         return $roles;
                     }),
 
-
                 BienMalColumn::make('resultados_ok_ko')
                     ->label(__('Resultados bien/mal'))
                     ->getStateUsing(function ($record) {
-                        if($record->type === 'especial') {
+                        if ($record->type === 'especial') {
                             return ''; // No mostrar para inspecciones especiales
                         }
 
                         $count_ok = $record->resultados->where('resultado', 1)->count();
                         $count_ko = $record->resultados->where('resultado', 0)->count();
-                        return $count_ok . ' / ' . $count_ko;
+
+                        return $count_ok.' / '.$count_ko;
                     }),
 
             ])
             ->filters([
-                //filtro de zona
+                // filtro de zona
                 SelectFilter::make('zona_id')
                     ->label(__('Zona'))
                     ->options(function () {
                         $zonas_ids = User::find(Auth::id())->zonas()->pluck('zona_id')->toArray();
-                        return \App\Models\Zona::whereIn('id', $zonas_ids)->pluck('name', 'id');
+
+                        return Zona::whereIn('id', $zonas_ids)->pluck('name', 'id');
                     })
                     ->query(function (Builder $query, array $data) {
                         $value = $data['value'] ?? null;
@@ -104,7 +106,7 @@ class InspeccionTable
                     ->label(__('Tipo Inspeción'))
                     ->options([
                         'periodica' => __('Periódica'),
-                        'especial' => __('Especial')
+                        'especial' => __('Especial'),
                     ])
                     ->default('periodica'),
                 SelectFilter::make('cuatrimestre')
@@ -165,7 +167,7 @@ class InspeccionTable
                     ->color('info')
                     ->tooltip(__('Descargar PDF'))
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn($record) => route('inspecciones.export-pdf', ['inspeccion' => $record]))
+                    ->url(fn ($record) => route('inspecciones.export-pdf', ['inspeccion' => $record]))
                     ->openUrlInNewTab(),
 
                 Action::make('pdfEspecial')
@@ -176,8 +178,8 @@ class InspeccionTable
                         return $record->type == 'periodica';
                     })
                     ->icon('heroicon-o-document-arrow-down')
-                    ->url(fn($record) => route('inspecciones.export-especial-pdf', ['inspeccion' => $record]))
-                    ->openUrlInNewTab()
+                    ->url(fn ($record) => route('inspecciones.export-especial-pdf', ['inspeccion' => $record]))
+                    ->openUrlInNewTab(),
             ])
             ->toolbarActions([
                 // BulkActionGroup::make([

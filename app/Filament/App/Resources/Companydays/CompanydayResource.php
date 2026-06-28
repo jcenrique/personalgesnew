@@ -14,7 +14,6 @@ use Auth;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -22,22 +21,23 @@ class CompanydayResource extends Resource
 {
     protected static ?string $model = Companyday::class;
 
-   protected static string|BackedEnum|null $navigationIcon = 'fas-calendar-day';
+    protected static string|BackedEnum|null $navigationIcon = 'fas-calendar-day';
 
     protected static ?string $recordTitleAttribute = 'fecha';
 
-protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 2;
 
-     public static function getNavigationGroup(): string|UnitEnum|null
+    public static function getNavigationGroup(): string|UnitEnum|null
     {
         return __('Gestión');
     }
 
-    //funciones de etiquetas singular y plural para el recurso
+    // funciones de etiquetas singular y plural para el recurso
     public static function getLabel(): string
     {
         return __('Día pedido Empresa');
     }
+
     public static function getPluralLabel(): string
     {
         return __('Días pedidos Empresa');
@@ -46,27 +46,24 @@ protected static ?int $navigationSort = 2;
     // funcion para que aparezca el badge del numero de sabados disponibles
     public static function getNavigationBadge(): ?string
     {
-          //obtener los dias adicionales del usuario para el año actual
+        // obtener los dias adicionales del usuario para el año actual
         $dias_totales = Companyday::where('user_id', Auth::id())->count();
 
-
-
-        //contar los días adicionales  se han solicitado disfrutar
+        // contar los días adicionales  se han solicitado disfrutar
         $dias_disfrutados = Disfrute::where('user_id', Auth::id())->where('disfrutable_type', Companyday::class)
             ->where('status', StatusSolicitudes::Aprobado)->count();
 
         $dias_disponibles = $dias_totales - $dias_disfrutados;
 
-
-
-
-        return  $dias_disponibles;
+        return $dias_disponibles;
     }
-    //badge color para el numero de usuarios
+
+    // badge color para el numero de usuarios
     public static function getNavigationBadgeColor(): ?string
     {
         return 'success';
     }
+
     public static function getNavigationBadgeTooltip(): ?string
     {
         return __('Número de dias pedidos por la empresa disponibles para disfrutar');
@@ -93,8 +90,8 @@ protected static ?int $navigationSort = 2;
     {
         return [
             'index' => ListCompanydays::route('/'),
-           // 'create' => CreateCompanyday::route('/create'),
-            //'edit' => EditCompanyday::route('/{record}/edit'),
+            // 'create' => CreateCompanyday::route('/create'),
+            // 'edit' => EditCompanyday::route('/{record}/edit'),
         ];
     }
 }

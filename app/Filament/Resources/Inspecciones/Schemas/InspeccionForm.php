@@ -6,7 +6,6 @@ use App\Models\Estacion;
 use App\Models\Inspeccion;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\RichEditor;
@@ -20,14 +19,13 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\IconSize;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Auth;
 
 class InspeccionForm
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema
-
-
 
             ->components([
                 Section::make(__('Inspección'))
@@ -55,7 +53,7 @@ class InspeccionForm
                             })
                             ->options([
                                 'periodica' => __('Periódica'),
-                                'especial' => __('Especial')
+                                'especial' => __('Especial'),
                             ])
                             ->default('periodica'),
 
@@ -91,11 +89,11 @@ class InspeccionForm
                                 $fecha = $get('fecha_hora');
                                 $estacionActual = $get('estacion_id');
 
-                                if (!$fecha) {
+                                if (! $fecha) {
                                     return (clone $estacionesQuery)->orderBy('name')->pluck('name', 'id');
                                 }
 
-                                $fecha = \Carbon\Carbon::parse($fecha);
+                                $fecha = Carbon::parse($fecha);
 
                                 // Obtener rango del cuatrimestre
                                 [$inicio, $fin] = self::rangoCuatrimestre($fecha);
@@ -103,7 +101,6 @@ class InspeccionForm
                                 // Estaciones que ya tienen inspección en ese cuatrimestre
                                 $ocupadas = Inspeccion::where('type', 'periodica')->whereBetween('fecha_hora', [$inicio, $fin])
                                     ->pluck('estacion_id')->toArray();
-
 
                                 // Si estamos editando, permitir la estación actual
                                 if ($estacionActual) {
@@ -119,13 +116,9 @@ class InspeccionForm
                                         ->orderBy('name')
                                         ->pluck('name', 'id');
                                 }
-                            })
-
-
-
+                            }),
 
                     ]),
-
 
                 Section::make(__('Agentes'))
                     ->icon('fas-asterisk')
@@ -140,8 +133,7 @@ class InspeccionForm
                             ->searchable()
                             ->options(User::whereHas(
                                 'roles',
-                                fn($q) =>
-                                $q->where('name', 'jefe_servicio')
+                                fn ($q) => $q->where('name', 'jefe_servicio')
                             )->orderBy('name', 'asc')->pluck('name', 'id')),
 
                         Select::make('user_id_2')
@@ -150,18 +142,17 @@ class InspeccionForm
                             ->options(
                                 User::whereHas(
                                     'roles',
-                                    fn($q) =>
-                                    $q->whereIn('name', ['tecnico_red', 'tecnico_red_habilitado'])
+                                    fn ($q) => $q->whereIn('name', ['tecnico_red', 'tecnico_red_habilitado'])
                                 )
                                     ->get()
 
                                     ->mapWithKeys(function ($user) {
                                         $roles = $user->roles()
                                             ->pluck('name')
-                                            ->map(fn($role) => str_replace('_', ' ', ucwords($role)))
+                                            ->map(fn ($role) => str_replace('_', ' ', ucwords($role)))
                                             ->join(', ');
 
-                                        return [$user->id  => "{$user->name} ({$roles})"];
+                                        return [$user->id => "{$user->name} ({$roles})"];
                                     })
                             )
                             ->searchable()
@@ -182,17 +173,17 @@ class InspeccionForm
                             })
                             ->color('primary')
                             ->iconColor('primary')
-                            ->icon(Heroicon::InformationCircle)
+                            ->icon(Heroicon::InformationCircle),
                     ]),
 
                 // Campos solo para inspección especial
                 Section::make(__('Inspección especial'))
                     ->schema([
                         TextInput::make('tema')
-                            ->required(fn(Get $get) => $get('type') === 'especial')
+                            ->required(fn (Get $get) => $get('type') === 'especial')
                             ->label(__('Tema de la visita')),
                         RichEditor::make('cuestiones')
-                            ->required(fn(Get $get) => $get('type') === 'especial')
+                            ->required(fn (Get $get) => $get('type') === 'especial')
                             ->label(__('Cuestión objeto de la inspección'))
                             ->extraAttributes(['style' => 'min-height: 300px;']),
                         Group::make([
@@ -203,20 +194,20 @@ class InspeccionForm
                                 ->closeOnDateSelection()
                                 ->native(),
                             Toggle::make('actions')
-                                ->label(fn(Get $get) => $get('actions') ? 'SI' : 'No')
+                                ->label(fn (Get $get) => $get('actions') ? 'SI' : 'No')
                                 ->reactive()
-                                ->required(fn(Get $get) => $get('type') === 'especial')
+                                ->required(fn (Get $get) => $get('type') === 'especial')
                                 ->aboveLabel(__('Acciones correctivas'))
                                 ->onColor('success')
                                 ->offColor('danger')
                                 ->inline()
                                 ->onIcon(Heroicon::CheckCircle)
                                 ->offIcon(Heroicon::XCircle),
-                        ])->columns(2)
+                        ])->columns(2),
 
                     ])
                     ->columnSpanFull()
-                    ->visible(fn(Get $get) => $get('type') === 'especial'),
+                    ->visible(fn (Get $get) => $get('type') === 'especial'),
 
                 Section::make(__('Observaciones/Incidencias'))
                     ->columnSpanFull()
@@ -232,15 +223,14 @@ class InspeccionForm
                                 ['bulletList', 'orderedList'],
                                 ['table'], // The `customBlocks` and `mergeTags` tools are also added here if those features are used.
                                 ['undo', 'redo'],
-                            ])
+                            ]),
 
                     ]),
-
 
             ]);
     }
 
-    private static function  rangoCuatrimestre(Carbon $fecha)
+    private static function rangoCuatrimestre(Carbon $fecha)
     {
         $mes = $fecha->month;
 

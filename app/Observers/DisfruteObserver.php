@@ -19,8 +19,8 @@ class DisfruteObserver
      */
     public function updated(Disfrute $disfrute): void
     {
-         //disparar el evento de livewire para actualizar el calendario
-            $this->refreshCalendar();
+        // disparar el evento de livewire para actualizar el calendario
+        $this->refreshCalendar();
 
     }
 
@@ -29,7 +29,7 @@ class DisfruteObserver
      */
     public function deleted(Disfrute $disfrute): void
     {
-         $this->refreshCalendar();
+        $this->refreshCalendar();
     }
 
     /**
@@ -37,7 +37,7 @@ class DisfruteObserver
      */
     public function restored(Disfrute $disfrute): void
     {
-         $this->refreshCalendar();
+        $this->refreshCalendar();
     }
 
     /**
@@ -45,14 +45,12 @@ class DisfruteObserver
      */
     public function forceDeleted(Disfrute $disfrute): void
     {
-         $this->refreshCalendar();
+        $this->refreshCalendar();
     }
 
-
- protected function refreshCalendar()
+    protected function refreshCalendar()
     {
-          //  dd('refreshCalendar');
+        //  dd('refreshCalendar');
 
     }
-
 }

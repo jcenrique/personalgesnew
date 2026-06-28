@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Zonas\Tables;
 
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -37,7 +36,7 @@ class ZonasTable
                     ->hiddenLabel()
                     ->tooltip(__('Delete')),
             ])
-              ->headerActions([
+            ->headerActions([
 
             ])
             ->toolbarActions([

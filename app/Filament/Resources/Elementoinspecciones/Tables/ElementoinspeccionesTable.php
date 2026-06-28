@@ -7,7 +7,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Grouping\Group;
@@ -21,7 +20,7 @@ class ElementoinspeccionesTable
             ->groups([
                 Group::make('categoria.nombre_es')
 
-                    ->getDescriptionFromRecordUsing(fn(Elementoinspeccion $record): string => $record->categoria->nombre_eu)
+                    ->getDescriptionFromRecordUsing(fn (Elementoinspeccion $record): string => $record->categoria->nombre_eu)
                     ->titlePrefixedWithLabel(false)
                     ->collapsible(),
             ])
@@ -35,20 +34,18 @@ class ElementoinspeccionesTable
                     ->label(__('Elemento'))
                     ->color('info')
                     ->description(function ($record) {
-                        return  $record->nombre_eu;
+                        return $record->nombre_eu;
                     })
                     ->searchable(),
 
                 ToggleColumn::make('active')
-                    ->label(__('Activo'))
-
-                    ,
+                    ->label(__('Activo')),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
-                 EditAction::make()
+                EditAction::make()
                     ->hiddenLabel()
                     ->tooltip(__('Edit')),
                 DeleteAction::make()

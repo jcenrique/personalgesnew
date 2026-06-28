@@ -2,6 +2,7 @@
 
 namespace App\Filament\App\Resources\Inspecciones\RelationManagers;
 
+use App\Models\Elementoinspeccion;
 use App\Models\Resultadoinspeccion;
 use Asmit\ResizedColumn\HasResizableColumn;
 use Filament\Actions\CreateAction;
@@ -43,19 +44,17 @@ class ResultadosRelationManager extends RelationManager
     {
         return $table
 
-
             ->defaultPaginationPageOption(25)
             ->groups([
                 Group::make('elemento.categoria.nombre_es')
 
-                    ->getDescriptionFromRecordUsing(fn(Resultadoinspeccion $record): string => $record->elemento->categoria->nombre_eu)
+                    ->getDescriptionFromRecordUsing(fn (Resultadoinspeccion $record): string => $record->elemento->categoria->nombre_eu)
                     ->titlePrefixedWithLabel(false)
                     ->collapsible(),
             ])
 
             ->defaultGroup('elemento.categoria.nombre_es')
             ->groupingSettingsHidden()
-
 
             ->recordTitleAttribute('elementoinspeccion_id')
             ->columns([
@@ -92,13 +91,13 @@ class ResultadosRelationManager extends RelationManager
                         Select::make('elementoinspeccion_id')
                             ->label(__('Elemento'))
                             ->options(function ($livewire) {
-                                return \App\Models\Elementoinspeccion::whereDoesntHave('resultados', function ($q) use ($livewire) {
+                                return Elementoinspeccion::whereDoesntHave('resultados', function ($q) use ($livewire) {
                                     $q->where('inspeccion_id', $livewire->ownerRecord->id);
                                 })
                                     ->get()
                                     ->mapWithKeys(function ($item) {
                                         return [
-                                            $item->id => "{$item->nombre_es} ({$item->nombre_eu})"
+                                            $item->id => "{$item->nombre_es} ({$item->nombre_eu})",
                                         ];
                                     });
                             })
@@ -108,19 +107,20 @@ class ResultadosRelationManager extends RelationManager
                     ])
                     ->mutateFormDataUsing(function ($data, $livewire) {
                         $data['inspeccion_id'] = $livewire->ownerRecord->id;
+
                         return $data;
                     }),
 
             ])
             ->recordActions([
                 // EditAction::make(),
-                //DissociateAction::make(),
+                // DissociateAction::make(),
                 DeleteAction::make()
                     ->hiddenLabel()
                     ->tooltip(__('Delete')),
             ])
             ->toolbarActions([
-                //BulkActionGroup::make([
+                // BulkActionGroup::make([
                 // DissociateBulkAction::make(),
                 // DeleteBulkAction::make(),
                 // ]),

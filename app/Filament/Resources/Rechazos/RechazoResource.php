@@ -11,11 +11,8 @@ use App\Models\Rechazo;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class RechazoResource extends Resource
@@ -24,23 +21,20 @@ class RechazoResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'far-circle-xmark';
 
-    //establecer el orden en el menu
+    // establecer el orden en el menu
     protected static ?int $navigationSort = 30;
-
-
-
-
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
         return __('Gestión');
     }
 
-    //funciones de etiquetas singular y plural para el recurso
+    // funciones de etiquetas singular y plural para el recurso
     public static function getLabel(): string
     {
         return __('Rechazo');
     }
+
     public static function getPluralLabel(): string
     {
         return __('Rechazos');
@@ -51,7 +45,8 @@ class RechazoResource extends Resource
     {
         return static::getEloquentQuery()->count();
     }
-    //badge color para el numero de usuarios
+
+    // badge color para el numero de usuarios
     public static function getNavigationBadgeColor(): ?string
     {
         return 'warning';
@@ -83,7 +78,6 @@ class RechazoResource extends Resource
         ];
     }
 
-
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
@@ -94,7 +88,6 @@ class RechazoResource extends Resource
                     ->toArray();
 
                 $query->whereIn('zona_id', $zonaIds);
-            })
-           ;
+            });
     }
 }

@@ -10,11 +10,11 @@ use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\Width;
-use Illuminate\Contracts\View\View;
 
 class ListInspecciones extends ListRecords
 {
     use HasResizableColumn;
+
     protected static string $resource = InspeccionResource::class;
 
     protected function getHeaderActions(): array
@@ -22,7 +22,6 @@ class ListInspecciones extends ListRecords
         return [
             CreateAction::make()
                 ->createAnother(false),
-
 
             Action::make('pendientes')
                 ->label(__('Pendientes del cuatrimestre'))
@@ -32,11 +31,12 @@ class ListInspecciones extends ListRecords
                 ->modalSubmitAction(false)
                 ->modalCancelActionLabel(__('Cerrar'))
                 ->modalContent(function () {
+                    $user = auth()->user();
+                    $zonaIds = $user?->zonas()->pluck('zonas.id') ?? collect();
+
                     // 1. Obtener filtros activos
                     $filtros = $this->getTableFiltersForm()->getState();
                     $cuatri = $filtros['cuatrimestre'] ?? null;
-
-
 
                     // 2. Si no hay cuatrimestre → usar el actual
                     if (! $cuatri || ! str_contains($cuatri['value'], '-')) {
@@ -53,22 +53,26 @@ class ListInspecciones extends ListRecords
                     ];
 
                     $inicio = $ranges[$num]['start'];
-                    $fin    = $ranges[$num]['end'];
+                    $fin = $ranges[$num]['end'];
 
                     // 4. Estaciones que SÍ tienen inspección en ese rango
-                    $estacionesConInspeccion = Inspeccion::where('type' , 'periodica')->whereBetween('fecha_hora', [$inicio, $fin])
+                    $estacionesConInspeccion = Inspeccion::where('type', 'periodica')->whereBetween('fecha_hora', [$inicio, $fin])
+                        ->whereHas('estacion', function ($query) use ($zonaIds) {
+                            $query->whereIn('zona_id', $zonaIds);
+                        })
                         ->pluck('estacion_id')
                         ->unique();
 
                     // 5. Estaciones pendientes
-                    $pendientes = Estacion::whereNotIn('id', $estacionesConInspeccion)->orderBy('name' , 'asc')->get();
-
+                    $pendientes = Estacion::query()
+                        ->whereIn('zona_id', $zonaIds)
+                        ->whereNotIn('id', $estacionesConInspeccion)
+                        ->orderBy('name', 'asc')
+                        ->get();
 
                     // $pendientes = \App\Models\Estacion::whereDoesntHave('inspecciones', function ($q) use ($inicio, $fin) {
                     //     $q->whereBetween('fecha_hora', [$inicio, $fin]);
                     // })->get();
-
-
 
                     return view(
                         'filament.resources.inspecciones.pendientes',
@@ -79,7 +83,7 @@ class ListInspecciones extends ListRecords
         ];
     }
 
-     public static function cuatrimestreActual(): array
+    public static function cuatrimestreActual(): array
     {
         $year = now()->year;
         $month = now()->month;

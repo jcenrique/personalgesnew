@@ -14,14 +14,13 @@ class Zona extends Model
         return $this->hasMany(Residencia::class);
     }
 
-     public function estaciones()
+    public function estaciones()
     {
         return $this->hasMany(Estacion::class);
     }
 
- public function users(): BelongsToMany
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
     }
-
 }

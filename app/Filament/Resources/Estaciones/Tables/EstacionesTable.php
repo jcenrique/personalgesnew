@@ -19,20 +19,18 @@ class EstacionesTable
     public static function configure(Table $table): Table
     {
         return $table
-
-          ->groups([
+            ->groups([
                 Group::make('zona.name')
-                    //obtener el numero de estaciones por zona
+                    // obtener el numero de estaciones por zona
                     ->getDescriptionFromRecordUsing(fn(Estacion $record): string => Zona::find($record->zona_id)->estaciones()->count() . ' ' . __('estaciones'))
-                    
+
                     ->titlePrefixedWithLabel(false)
                     ->collapsible(),
             ])
-        ->defaultGroup('zona.name')
+            ->defaultGroup('zona.name')
             ->groupingSettingsHidden()
-        ->defaultSort('pk', 'asc')
+            ->defaultSort('name', 'asc')
             ->columns([
-
 
                 TextColumn::make('name')
                     ->label(__('Estación'))
@@ -40,28 +38,27 @@ class EstacionesTable
                     ->searchable()
                     ->sortable(),
 
-                 TextColumn::make('nemonico')
+                TextColumn::make('nemonico')
                     ->label(__('Nemónico'))
                     ->sortable(),
 
-                     TextColumn::make('pk')
+                TextColumn::make('pk')
                     ->label(__('PK.'))
-                    ->numeric(3,',')
+                    ->numeric(3, ',')
                     ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('zona_id')
-                    ->relationship('zona' , 'name')
+                    ->relationship('zona', 'name'),
             ])
             ->recordActions([
                 EditAction::make()
-                     ->modalWidth(Width::Small)
-                     ->hiddenLabel(true)
-                     ->tooltip(__('Edit')),
+                    ->modalWidth(Width::Small)
+                    ->hiddenLabel(true)
+                    ->tooltip(__('Edit')),
                 DeleteAction::make()
-
-                     ->hiddenLabel(true)
-                     ->tooltip(__('Delete')),
+                    ->hiddenLabel(true)
+                    ->tooltip(__('Delete')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

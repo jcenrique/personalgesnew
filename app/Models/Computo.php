@@ -9,14 +9,13 @@ use OwenIt\Auditing\Contracts\Auditable;
 
 class Computo extends Model implements Auditable
 {
-     use HasFactory, Notifiable;
+    use HasFactory, Notifiable;
     use \OwenIt\Auditing\Auditable;
 
     protected $fillable = [
         'year',
         'user_id',
-        'disponible'
-
+        'disponible',
 
     ];
 
@@ -34,21 +33,18 @@ class Computo extends Model implements Auditable
 
             'year' => 'integer',
 
-
         ];
     }
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-
-
     public function disfrutes()
     {
         return $this->morphMany(Disfrute::class, 'disfrutable');
     }
-
 
     public function rechazos()
     {

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Companydays\Tables;
 use App\Enum\StatusSolicitudes;
 use App\Filament\Resources\Companydays\Actions\AprobarCompanydayAction;
 use App\Filament\Resources\Companydays\Actions\RechazarCompanydayAction;
+use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -24,11 +25,10 @@ class CompanydaysTable
         return $table
             ->columns([
 
-                 TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->label(__('Usuario'))
                     ->searchable()
                     ->sortable(),
-
 
                 TextColumn::make('fecha')
                     ->label(__('Fecha'))
@@ -67,7 +67,7 @@ class CompanydaysTable
 
                         // Si es super_admin o admin, mostrar todos los usuarios
                         if ($user->hasRole('super_admin') || $user->hasRole('admin')) {
-                            return \App\Models\User::orderBy('name')->pluck('name', 'id')->toArray();
+                            return User::orderBy('name')->pluck('name', 'id')->toArray();
                         }
 
                         // Si NO es admin, obtener zonas del usuario autenticado directamente
@@ -76,7 +76,7 @@ class CompanydaysTable
                             ->toArray();
 
                         // Solo mostrar usuarios de esas zonas
-                        return \App\Models\User::whereHas('zonas', function (Builder $q) use ($zonaIds) {
+                        return User::whereHas('zonas', function (Builder $q) use ($zonaIds) {
                             $q->whereIn('id', $zonaIds);
                         })
                             ->orderBy('name')
@@ -88,9 +88,9 @@ class CompanydaysTable
             ])
             ->recordActions([
                 AprobarCompanydayAction::make('aprobar')
-                    ->visible(fn($record) => $record->disfrute?->status === StatusSolicitudes::Solicitado),
+                    ->visible(fn ($record) => $record->disfrute?->status === StatusSolicitudes::Solicitado),
                 RechazarCompanydayAction::make('rechazar')
-                    ->visible(fn($record) => $record->disfrute?->status === StatusSolicitudes::Solicitado),
+                    ->visible(fn ($record) => $record->disfrute?->status === StatusSolicitudes::Solicitado),
                 EditAction::make()
 
                     ->modalWidth(Width::Small)
@@ -99,10 +99,11 @@ class CompanydaysTable
                         if ($record->disfrute) {
                             $data['disfrute']['fecha_disfrute'] = $record->disfrute->fecha_disfrute;
                             $data['disfrute']['status'] = $record->disfrute->status;
-                        }else{
+                        } else {
 
                             $data['disfrute']['status'] = StatusSolicitudes::Disponible;
                         }
+
                         return $data;
                     })
 
@@ -118,7 +119,7 @@ class CompanydaysTable
                         if (in_array($status, [
                             StatusSolicitudes::Solicitado,
                             StatusSolicitudes::Aprobado,
-                            StatusSolicitudes::Rechazado
+                            StatusSolicitudes::Rechazado,
                         ])) {
 
                             if ($disfrute) {

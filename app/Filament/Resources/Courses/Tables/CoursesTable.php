@@ -19,8 +19,8 @@ class CoursesTable
                 TextColumn::make('name')
                     ->label(__('Nombre del curso'))
                     ->width('10%')
-                    ->description(fn($record) =>   Str::words($record->description, 10, '...'))
-                    ->tooltip(fn($record) => $record->description)
+                    ->description(fn ($record) => Str::words($record->description, 10, '...'))
+                    ->tooltip(fn ($record) => $record->description)
                     ->searchable()->sortable(),
 
                 TextColumn::make('roles.name')
@@ -29,18 +29,19 @@ class CoursesTable
                     ->getStateUsing(function ($record) {
 
                         $roles_user = $record->roles;
+
                         return $roles_user
                             ->pluck('name')
 
                             ->unique()
-                            ->map(fn($name) => ucwords(str_replace('_', ' ', $name)))
+                            ->map(fn ($name) => ucwords(str_replace('_', ' ', $name)))
                             ->implode(', ');
                     })
                     ->wrap()
                     ->separator(', '),
                 IconColumn::make('requires_renewal')
                     ->label(__('Requiere renovación'))
-                     ->wrapHeader()
+                    ->wrapHeader()
                     ->boolean(),
                 TextColumn::make('duration_hours')
                     ->label(__('Horas')),
@@ -49,8 +50,8 @@ class CoursesTable
                     ->badge()
                     ->label(__('Renovación'))
                     ->colors([
-                        'gray' => fn($record) => ! $record->requires_renewal,
-                        'success' => fn($record) => $record->requires_renewal,
+                        'gray' => fn ($record) => ! $record->requires_renewal,
+                        'success' => fn ($record) => $record->requires_renewal,
                     ]),
             ])
             ->filters([

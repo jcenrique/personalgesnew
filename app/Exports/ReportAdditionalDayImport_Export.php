@@ -11,13 +11,11 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ReportAdditionalDayImport_Export implements FromArray, ShouldAutoSize, WithColumnWidths, WithStyles
 {
-
-
-
     protected $data;
-    protected $year;
-    protected $count;
 
+    protected $year;
+
+    protected $count;
 
     public function __construct($data, $year, $rows)
     {
@@ -26,10 +24,8 @@ class ReportAdditionalDayImport_Export implements FromArray, ShouldAutoSize, Wit
         $this->count = $rows;
     }
 
-
     public function array(): array
     {
-
 
         // 🔴 Cabecera personalizada + datos
         return array_merge(
@@ -48,7 +44,6 @@ class ReportAdditionalDayImport_Export implements FromArray, ShouldAutoSize, Wit
         );
     }
 
-
     public function columnWidths(): array
     {
         return [
@@ -61,9 +56,9 @@ class ReportAdditionalDayImport_Export implements FromArray, ShouldAutoSize, Wit
     {
         return [
             // Style the first row as bold text.
-            1    => ['font' => ['bold' => true, 'size' => 16]],
-            7    => ['font' => ['bold' => true, 'size' => 16]],
-            8    => ['font' => ['bold' => true, 'size' => 12]],
+            1 => ['font' => ['bold' => true, 'size' => 16]],
+            7 => ['font' => ['bold' => true, 'size' => 16]],
+            8 => ['font' => ['bold' => true, 'size' => 12]],
             'A2:A5' => ['font' => ['bold' => true]],
             'B2:B5' => ['alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,

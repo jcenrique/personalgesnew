@@ -17,7 +17,6 @@ class Sabado extends Model implements Auditable
         'user_id',
         'status',
 
-
     ];
 
     // borrar en cascada el disfrute relacionado al eliminar un sábado
@@ -33,7 +32,6 @@ class Sabado extends Model implements Auditable
         return [
             'sabado_trabajado' => 'date',
 
-
         ];
     }
 
@@ -42,12 +40,10 @@ class Sabado extends Model implements Auditable
         return $this->belongsTo(User::class);
     }
 
-
     public function disfrute()
     {
         return $this->morphOne(Disfrute::class, 'disfrutable');
     }
-
 
     public function rechazos()
     {

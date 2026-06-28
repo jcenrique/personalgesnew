@@ -11,7 +11,6 @@ use App\Models\Rechazo;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use UnitEnum;
@@ -20,33 +19,34 @@ class RechazoResource extends Resource
 {
     protected static ?string $model = Rechazo::class;
 
-    protected static string|BackedEnum|null $navigationIcon ='far-circle-xmark';
+    protected static string|BackedEnum|null $navigationIcon = 'far-circle-xmark';
 
-    //establecer el orden en el menu
+    // establecer el orden en el menu
     protected static ?int $navigationSort = 30;
-
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
         return __('Gestión');
     }
 
-    //funciones de etiquetas singular y plural para el recurso
+    // funciones de etiquetas singular y plural para el recurso
     public static function getLabel(): string
     {
         return __('Rechazo');
     }
+
     public static function getPluralLabel(): string
     {
         return __('Rechazos');
     }
 
-          // funcion para que aparezca el badge del numero de sabados disponibles
+    // funcion para que aparezca el badge del numero de sabados disponibles
     public static function getNavigationBadge(): ?string
     {
         return static::$model::where('user_id', Auth::id())->count();
     }
-    //badge color para el numero de usuarios
+
+    // badge color para el numero de usuarios
     public static function getNavigationBadgeColor(): ?string
     {
         return 'warning';
@@ -73,8 +73,8 @@ class RechazoResource extends Resource
     {
         return [
             'index' => ListRechazos::route('/'),
-           // 'create' => CreateRechazo::route('/create'),
-            //'edit' => EditRechazo::route('/{record}/edit'),
+            // 'create' => CreateRechazo::route('/create'),
+            // 'edit' => EditRechazo::route('/{record}/edit'),
         ];
     }
 }

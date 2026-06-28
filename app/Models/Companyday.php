@@ -21,11 +21,10 @@ class Companyday extends Model
         return $this->belongsTo(User::class);
     }
 
-  public function disfrute()
+    public function disfrute()
     {
         return $this->morphOne(Disfrute::class, 'disfrutable');
     }
-
 
     public function rechazos()
     {

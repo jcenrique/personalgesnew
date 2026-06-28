@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Disponibilidades\Tables;
 
+use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -47,14 +48,15 @@ class DisponibilidadesTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                 //filtro por año
+                // filtro por año
                 SelectFilter::make('year')
                     ->label(__('Año'))
                     ->options(function () {
-                        $years =  DB::table('disponibilidades')->distinct()->orderBy('year', 'asc')->pluck('year', 'year')->toArray();
+                        $years = DB::table('disponibilidades')->distinct()->orderBy('year', 'asc')->pluck('year', 'year')->toArray();
+
                         return $years;
                     })
-                    //por defecto año actual
+                    // por defecto año actual
 
                     ->searchable()
                     ->placeholder(__('Selecciona un año')),
@@ -66,7 +68,7 @@ class DisponibilidadesTable
 
                         // Si es super_admin o admin, mostrar todos los usuarios
                         if ($user->hasRole('super_admin') || $user->hasRole('admin')) {
-                            return \App\Models\User::orderBy('name')->pluck('name', 'id')->toArray();
+                            return User::orderBy('name')->pluck('name', 'id')->toArray();
                         }
 
                         // Si NO es admin, obtener zonas del usuario autenticado directamente
@@ -75,7 +77,7 @@ class DisponibilidadesTable
                             ->toArray();
 
                         // Solo mostrar usuarios de esas zonas
-                        return \App\Models\User::whereHas('zonas', function (Builder $q) use ($zonaIds) {
+                        return User::whereHas('zonas', function (Builder $q) use ($zonaIds) {
                             $q->whereIn('id', $zonaIds);
                         })
                             ->orderBy('name')
@@ -90,9 +92,9 @@ class DisponibilidadesTable
                     ->hiddenLabel(true)
                     ->tooltip(__('Edit'))
                     ->modalWidth(Width::Small),
-               DeleteAction::make()
+                DeleteAction::make()
                     ->hiddenLabel(true)
-                    ->tooltip(__('Delete'))
+                    ->tooltip(__('Delete')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

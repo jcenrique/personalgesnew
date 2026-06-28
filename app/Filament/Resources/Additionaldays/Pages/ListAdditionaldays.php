@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Additionaldays\Pages;
 
 use App\Enum\StatusSolicitudes;
 use App\Filament\Resources\Additionaldays\AdditionaldayResource;
-use App\Models\Additionalday;
 use Asmit\ResizedColumn\HasResizableColumn;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -12,7 +11,6 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 
 class ListAdditionaldays extends ListRecords
 {
@@ -33,12 +31,10 @@ class ListAdditionaldays extends ListRecords
                 ->label(__('Importar días adicionales'))
                 ->color('success')
                 ->icon(Heroicon::ArrowUpOnSquareStack)
-                ->url('additionaldays/add-days')
+                ->url('additionaldays/add-days'),
 
         ];
     }
-
-
 
     public function getTabs(): array
     {
@@ -47,10 +43,10 @@ class ListAdditionaldays extends ListRecords
             'available' => Tab::make()->label(__('Disponibles'))
                 ->icon(Heroicon::Check)
                 ->badgeColor(StatusSolicitudes::Disponible->getColor())
-                ->badge(function ($query,$livewire) {
+                ->badge(function ($query, $livewire) {
 
                     $filterUserId = $livewire->getTable()->getFilters()['user_id']->getState()['value'] ?? null;
-                    //incluir el filtro de user_id en la consulta si no es null
+                    // incluir el filtro de user_id en la consulta si no es null
                     $query = static::getResource()::getEloquentQuery();
                     if ($filterUserId) {
                         $query->where('user_id', $filterUserId);
@@ -78,21 +74,20 @@ class ListAdditionaldays extends ListRecords
                 ->badge(function ($livewire) {
 
                     $filterUserId = $livewire->getTable()->getFilters()['user_id']->getState()['value'] ?? null;
-                    //incluir el filtro de user_id en la consulta si no es null
+                    // incluir el filtro de user_id en la consulta si no es null
                     $query = static::getResource()::getEloquentQuery();
                     if ($filterUserId) {
                         $query->where('user_id', $filterUserId);
                     }
 
-                     $filterYear = $livewire->getTable()->getFilters()['year']->getState()['value'] ?? null;
+                    $filterYear = $livewire->getTable()->getFilters()['year']->getState()['value'] ?? null;
                     if ($filterYear) {
                         $query->where('year', $filterYear);
                     }
 
-
                     $count = $query
                         ->whereHas('disfrute', function (Builder $query) {
-                            //dd($query->where('status', StatusSolicitudes::Solicitado));
+                            // dd($query->where('status', StatusSolicitudes::Solicitado));
                             $query->where('status', StatusSolicitudes::Solicitado);
                         })
                         ->get()->count();
@@ -102,30 +97,29 @@ class ListAdditionaldays extends ListRecords
                 ->query(function (Builder $query) {
                     $query
                         ->whereHas('disfrute', function (Builder $query) {
-                            //dd($query->where('status', StatusSolicitudes::Solicitado));
+                            // dd($query->where('status', StatusSolicitudes::Solicitado));
                             $query->where('status', StatusSolicitudes::Solicitado);
                         })
                         ->get();
                 }),
 
-
             'approved' => Tab::make()->label(__('Aprobados'))->icon(Heroicon::CheckBadge)
                 ->badgeColor(StatusSolicitudes::Aprobado->getColor())
                 ->badge(function ($livewire) {
                     $filterUserId = $livewire->getTable()->getFilters()['user_id']->getState()['value'] ?? null;
-                    //incluir el filtro de user_id en la consulta si no es null
+                    // incluir el filtro de user_id en la consulta si no es null
                     $query = static::getResource()::getEloquentQuery();
                     if ($filterUserId) {
                         $query->where('user_id', $filterUserId);
                     }
 
-                     $filterYear = $livewire->getTable()->getFilters()['year']->getState()['value'] ?? null;
+                    $filterYear = $livewire->getTable()->getFilters()['year']->getState()['value'] ?? null;
                     if ($filterYear) {
                         $query->where('year', $filterYear);
                     }
                     $count = $query
                         ->whereHas('disfrute', function (Builder $query) {
-                            //dd($query->where('status', StatusSolicitudes::Solicitado));
+                            // dd($query->where('status', StatusSolicitudes::Solicitado));
                             $query->where('status', StatusSolicitudes::Aprobado);
                         })
                         ->get()->count();
@@ -135,7 +129,7 @@ class ListAdditionaldays extends ListRecords
                 ->query(function (Builder $query) {
                     $query
                         ->whereHas('disfrute', function (Builder $query) {
-                            //dd($query->where('status', StatusSolicitudes::Solicitado));
+                            // dd($query->where('status', StatusSolicitudes::Solicitado));
                             $query->where('status', StatusSolicitudes::Aprobado);
                         })
                         ->get();
@@ -145,31 +139,27 @@ class ListAdditionaldays extends ListRecords
                 ->badgeColor('primary')
                 ->badge(function ($livewire) {
                     $filterUserId = $livewire->getTable()->getFilters()['user_id']->getState()['value'] ?? null;
-                    //incluir el filtro de user_id en la consulta si no es null
+                    // incluir el filtro de user_id en la consulta si no es null
                     $query = static::getResource()::getEloquentQuery();
                     if ($filterUserId) {
                         $query->where('user_id', $filterUserId);
                     }
 
-                     $filterYear = $livewire->getTable()->getFilters()['year']->getState()['value'] ?? null;
+                    $filterYear = $livewire->getTable()->getFilters()['year']->getState()['value'] ?? null;
                     if ($filterYear) {
                         $query->where('year', $filterYear);
                     }
 
                     $count = $query->get()->count();
 
-
                     return $count > 0 ? $count : null;
                 })
-                ->modifyQueryUsing(function ($query) {
-                    $query;
-                }),
-
+                ->modifyQueryUsing(function ($query) {}),
 
         ];
     }
 
-    public function getDefaultActiveTab(): string | int | null
+    public function getDefaultActiveTab(): string|int|null
     {
         return 'available';
     }

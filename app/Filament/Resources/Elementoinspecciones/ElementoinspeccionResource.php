@@ -7,7 +7,6 @@ use App\Filament\Resources\Elementoinspecciones\Pages\EditElementoinspeccion;
 use App\Filament\Resources\Elementoinspecciones\Pages\ListElementoinspeccions;
 use App\Filament\Resources\Elementoinspecciones\Schemas\ElementoinspeccionForm;
 use App\Filament\Resources\Elementoinspecciones\Tables\ElementoinspeccionesTable;
-
 use App\Models\Elementoinspeccion;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -26,18 +25,19 @@ class ElementoinspeccionResource extends Resource
 
     protected static ?string $slug = 'elementoinspecciones';
 
-    protected static ?int $navigationSort= 23;
+    protected static ?int $navigationSort = 23;
 
-        public static function getNavigationGroup(): string|UnitEnum|null
+    public static function getNavigationGroup(): string|UnitEnum|null
     {
         return __('Registro Inspecciones');
     }
 
-    //funciones de etiquetas singular y plural para el recurso
+    // funciones de etiquetas singular y plural para el recurso
     public static function getLabel(): string
     {
         return __('Elemento inspección');
     }
+
     public static function getPluralLabel(): string
     {
         return __('Elementos inspección');
@@ -46,14 +46,14 @@ class ElementoinspeccionResource extends Resource
     // funcion para que aparezca el badge del numero de sabados disponibles
     public static function getNavigationBadge(): ?string
     {
-                 return  Elementoinspeccion::count();
+        return Elementoinspeccion::count();
     }
-    //badge color para el numero de usuarios
+
+    // badge color para el numero de usuarios
     public static function getNavigationBadgeColor(): ?string
     {
         return 'success';
     }
-
 
     public static function form(Schema $schema): Schema
     {
@@ -76,8 +76,8 @@ class ElementoinspeccionResource extends Resource
     {
         return [
             'index' => ListElementoinspeccions::route('/'),
-           // 'create' => CreateElementoinspeccion::route('/create'),
-            //'edit' => EditElementoinspeccion::route('/{record}/edit'),
+            // 'create' => CreateElementoinspeccion::route('/create'),
+            // 'edit' => EditElementoinspeccion::route('/{record}/edit'),
         ];
     }
 }

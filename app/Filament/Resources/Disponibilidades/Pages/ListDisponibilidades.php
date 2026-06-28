@@ -8,7 +8,6 @@ use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\Width;
 
-
 class ListDisponibilidades extends ListRecords
 {
     use HasResizableColumn;

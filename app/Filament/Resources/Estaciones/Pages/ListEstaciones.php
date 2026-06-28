@@ -11,14 +11,14 @@ use Filament\Support\Enums\Width;
 class ListEstaciones extends ListRecords
 {
     use HasResizableColumn;
+
     protected static string $resource = EstacionResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make()
-                ->modalWidth(Width::Small)
-            ,
+                ->modalWidth(Width::Small),
         ];
     }
 }

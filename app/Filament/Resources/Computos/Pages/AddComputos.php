@@ -26,24 +26,19 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class AddComputos extends Page implements HasForms, HasTable
 {
-    use InteractsWithTable;
-    use InteractsWithForms;
     use HasResizableColumn;
+    use InteractsWithForms;
+    use InteractsWithTable;
 
     protected static string $resource = ComputoResource::class;
 
     protected string $view = 'filament.resources.computos.pages.add-computos';
 
-
-
-
     public function getTitle(): string
     {
 
-
         return __('Añadir computos');
     }
-
 
     protected function getHeaderActions(): array
     {
@@ -62,6 +57,7 @@ class AddComputos extends Page implements HasForms, HasTable
                         ->label(__('Año'))
                         ->options(function () {
                             $currentYear = date('Y');
+
                             return [
                                 $currentYear - 2 => $currentYear - 2,
                                 $currentYear - 1 => $currentYear - 1,
@@ -77,8 +73,8 @@ class AddComputos extends Page implements HasForms, HasTable
                     $year = (int) $data['year'];
 
                     $rows = Excel::toArray([], $data['file'])[0];
-                    //validar contenido
-                    $fila1 = array_map(fn($h) => strtolower(trim($h)), $rows[1]);
+                    // validar contenido
+                    $fila1 = array_map(fn ($h) => strtolower(trim($h)), $rows[1]);
 
                     if ($fila1[0] === '' || $fila1[1] === '') {
 
@@ -91,9 +87,9 @@ class AddComputos extends Page implements HasForms, HasTable
                         return;
                     }
 
-                    $header = array_map(fn($h) => strtolower(trim($h)), $rows[0]);
+                    $header = array_map(fn ($h) => strtolower(trim($h)), $rows[0]);
 
-                    //validar encabezado
+                    // validar encabezado
 
                     if ($header[0] !== 'codigo_agente' || $header[1] !== 'minutos') {
 
@@ -112,32 +108,37 @@ class AddComputos extends Page implements HasForms, HasTable
 
                     DB::transaction(function () use ($rows, $year, &$reportData) {
 
-                        //guardar el computo nuevo y eliminar el antiguo solo si el usuario no ha disfrutado de horas del computo, si ha disfrutado se guarda el nuevo computo pero no se elimina el antiguo y se muestra un mensaje indicando que no se han eliminado algunos dias adicionales por estar ya disfrutados por el agente
+                        // guardar el computo nuevo y eliminar el antiguo solo si el usuario no ha disfrutado de horas del computo, si ha disfrutado se guarda el nuevo computo pero no se elimina el antiguo y se muestra un mensaje indicando que no se han eliminado algunos dias adicionales por estar ya disfrutados por el agente
 
                         // 3️⃣ Procesar Excel
                         foreach ($rows as $index => $row) {
 
-                            if ($index === 0) continue; // cabecera
+                            if ($index === 0) {
+                                continue;
+                            } // cabecera
 
                             [$codigo, $minutos] = $row;
 
-                            if (! $codigo) continue;
+                            if (! $codigo) {
+                                continue;
+                            }
 
                             $user = User::where('codigo_agente', $codigo)->first();
 
-                            if (! $user) continue;
+                            if (! $user) {
+                                continue;
+                            }
 
                             $minutos = (int) $minutos;
 
                             // Verificar si el usuario tiene un cómputo para el año especificado si no tiene, se crea uno nuevo, si existe se modifica el actual, no se tiene en cuenta los disfutes asociados
 
-
                             $computo = Computo::where('user_id', $user->id)
                                 ->where('year', $year)
                                 ->first();
-                            //si el usuario ha disfrutado de horas no se realizan cambios y se crea el informe de usuarios que no se han modificado con los dias disfrutados
+                            // si el usuario ha disfrutado de horas no se realizan cambios y se crea el informe de usuarios que no se han modificado con los dias disfrutados
                             if ($computo && $computo->disfrutes()->exists()) {
-                                //se crea un informe de usuarios que no se han modificado con los dias disfrutados para exportar a excel posteriormente
+                                // se crea un informe de usuarios que no se han modificado con los dias disfrutados para exportar a excel posteriormente
                                 $reportData[] = [
                                     'codigo_agente' => $user->codigo_agente,
                                     'name' => $user->name,
@@ -161,8 +162,7 @@ class AddComputos extends Page implements HasForms, HasTable
                         }
                     });
 
-
-                     $reportId = uniqid();
+                    $reportId = uniqid();
 
                     cache()->put("report_$reportId", $reportData, now()->addMinutes(10));
 
@@ -175,7 +175,7 @@ class AddComputos extends Page implements HasForms, HasTable
                                 : __('La importación se ha completado correctamente.')
                         )
                         ->actions([
-                           
+
                             Action::make('excel_export')
                                 ->button()
                                 ->icon('fas-file-export')
@@ -189,17 +189,16 @@ class AddComputos extends Page implements HasForms, HasTable
                         ])
                         ->success()
                         ->send();
-                })
+                }),
 
         ];
     }
-
 
     public static function table(Table $table): Table
     {
         return $table
             ->query(User::orderByRaw('codigo_agente + 0 ASC'))
-            //->poll('20s')
+            // ->poll('20s')
             ->columns([
                 TextColumn::make('codigo_agente')
                     ->label(__('Código agente'))
@@ -220,11 +219,12 @@ class AddComputos extends Page implements HasForms, HasTable
                     ->label(__('Roles'))
                     ->getStateUsing(function ($record) {
                         $roles_user = $record->roles;
+
                         return $roles_user
                             ->pluck('name')
 
                             ->unique()
-                            ->map(fn($name) => ucwords(str_replace('_', ' ', $name)))
+                            ->map(fn ($name) => ucwords(str_replace('_', ' ', $name)))
                             ->implode(', ');
                     })
                     ->badge()
@@ -236,18 +236,17 @@ class AddComputos extends Page implements HasForms, HasTable
 
                     ->getStateUsing(function ($record, $livewire) {
                         $year = $livewire->tableFilters['year']['value'] ?: now()->year;
-                        $computo =  Computo::where('user_id', $record->id)
+                        $computo = Computo::where('user_id', $record->id)
                             ->where('year', $year)
                             ->first();
-                        if (!$computo) {
+                        if (! $computo) {
                             return '00:00';
                         }
                         $horas = intdiv($computo->disponible, 60);
-                        $mins  = $computo->disponible % 60;
+                        $mins = $computo->disponible % 60;
+
                         return sprintf('%02d:%02d', $horas, $mins);
-                    })
-
-
+                    }),
 
             ])
             ->recordActions([
@@ -266,7 +265,7 @@ class AddComputos extends Page implements HasForms, HasTable
                                 ->label(__('Horas'))
                                 ->default(function ($record, $livewire) {
                                     $year = $livewire->tableFilters['year']['value'] ?: now()->year;
-                                    $computo =  Computo::where('user_id', $record->id)
+                                    $computo = Computo::where('user_id', $record->id)
                                         ->where('year', $year)
                                         ->first();
                                     if ($computo) {
@@ -278,7 +277,7 @@ class AddComputos extends Page implements HasForms, HasTable
                                 ->columnSpan(1)
                                 ->required()
                                 ->minValue(0)
-                                //->suffixIcon('heroicon-o-clock')
+                                // ->suffixIcon('heroicon-o-clock')
                                 ->numeric(),
 
                             TextInput::make('minutos')
@@ -286,7 +285,7 @@ class AddComputos extends Page implements HasForms, HasTable
                                 ->label(__('Minutos'))
                                 ->default(function ($record, $livewire) {
                                     $year = $livewire->tableFilters['year']['value'] ?: now()->year;
-                                    $computo =  Computo::where('user_id', $record->id)
+                                    $computo = Computo::where('user_id', $record->id)
                                         ->where('year', $year)
                                         ->first();
                                     if ($computo) {
@@ -302,25 +301,25 @@ class AddComputos extends Page implements HasForms, HasTable
                                 // ->suffixIcon('heroicon-o-clock')
                                 ->numeric(),
 
-                        ],)->columns(2)
+                        ], )->columns(2),
                     ])
                     ->action(function ($data, Action $action, $record, $livewire) {
 
-
-                        //comvertir los campos horas y minutos a minutos para guardar en la DB
+                        // comvertir los campos horas y minutos a minutos para guardar en la DB
 
                         $minutos_computo = ($data['horas'] * 60) + $data['minutos'];
 
-                        //obtener el año del filtro de la tabla
+                        // obtener el año del filtro de la tabla
                         $year = $livewire->tableFilters['year']['value'] ?: now()->year;
 
-                        //si el usuario ha disfrutado de horas del computo no se permite modificar el computo
+                        // si el usuario ha disfrutado de horas del computo no se permite modificar el computo
                         if ($record->disfrutes()->exists()) {
                             Notification::make()
                                 ->title(__('No se puede modificar el cómputo'))
                                 ->body(__('El usuario ya ha disfrutado de horas del cómputo, por lo que no se puede modificar.'))
                                 ->danger()
                                 ->send();
+
                             return;
                         }
                         Computo::updateOrCreate(
@@ -332,13 +331,11 @@ class AddComputos extends Page implements HasForms, HasTable
                                 'disponible' => $minutos_computo,
                             ]
                         );
-                    })
-
+                    }),
 
             ])
             ->headerActions([])
             ->filters([
-
 
                 SelectFilter::make('year')
                     ->label(__('Año'))
@@ -348,6 +345,7 @@ class AddComputos extends Page implements HasForms, HasTable
                     ->placeholder(__('Selecciona un año'))
                     ->options(function () {
                         $currentYear = date('Y');
+
                         return [
                             $currentYear - 2 => $currentYear - 2,
                             $currentYear - 1 => $currentYear - 1,
@@ -361,13 +359,10 @@ class AddComputos extends Page implements HasForms, HasTable
                         // ✅ no hacemos nada -> no filtramos usuarios
                     }),
 
-
-
-
-                //crear un filtro para usuarios
+                // crear un filtro para usuarios
                 SelectFilter::make('id')
                     ->label(__('Usuario'))
-                    ->options(\App\Models\User::pluck('name', 'id'))
+                    ->options(User::pluck('name', 'id'))
                     ->searchable(),
 
             ]);

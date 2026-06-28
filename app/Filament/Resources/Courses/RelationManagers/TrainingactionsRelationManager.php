@@ -15,13 +15,12 @@ use Filament\Tables\Table;
 class TrainingactionsRelationManager extends RelationManager
 {
     use HasResizableColumn;
+
     protected static string $relationship = 'trainingactions';
 
     protected static ?string $relatedResource = TrainingActionResource::class;
 
-
-
-    public  function table(Table $table): Table
+    public function table(Table $table): Table
     {
         return $table
             ->columns([
@@ -65,12 +64,12 @@ class TrainingactionsRelationManager extends RelationManager
                 EditAction::make()
 
                     ->hiddenLabel(true)
-                    ->tooltip(__('Edit'))
+                    ->tooltip(__('Edit')),
 
             ])
             ->headerActions([
                 CreateAction::make('crear')
-                    ->modalWidth(Width::Small)
+                    ->modalWidth(Width::Small),
             ]);
     }
 }

@@ -1,11 +1,9 @@
 <?php
 
-
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class TrainingActionUser extends Pivot
 {
@@ -17,8 +15,6 @@ class TrainingActionUser extends Pivot
         'training_action_id',
         'user_id',
         'attended',
-
-        'certificate_path',
     ];
 
     protected $casts = [
@@ -52,13 +48,13 @@ class TrainingActionUser extends Pivot
     public function getIsExpiredAttribute()
     {
         dd('hola');
-        if (!$this->trainingAction->end_date) {
+        if (! $this->trainingAction->end_date) {
             return false;
         }
 
         $course = $this->trainingAction->course;
 
-        if (!$course->requires_renewal) {
+        if (! $course->requires_renewal) {
             return false;
         }
 
@@ -68,14 +64,14 @@ class TrainingActionUser extends Pivot
     // Fecha de caducidad
     public function getExpiresAtAttribute()
     {
-          dd('hola1');
-        if (!$this->trainingAction->end_date) {
+        dd('hola1');
+        if (! $this->trainingAction->end_date) {
             return null;
         }
 
         $course = $this->trainingAction->course;
 
-        if (!$course->requires_renewal) {
+        if (! $course->requires_renewal) {
             return null;
         }
 

@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Notification as FacadesNotification;
 class DisfrutesRelationManager extends RelationManager
 {
     use HasResizableColumn;
+
     protected static string $relationship = 'disfrutes';
 
     protected static ?string $relatedResource = ComputoResource::class;
@@ -45,7 +46,7 @@ class DisfrutesRelationManager extends RelationManager
 
                         $horas = intdiv($minutos, 60);
 
-                        $mins  = $minutos % 60;
+                        $mins = $minutos % 60;
 
                         return sprintf('%02d:%02d', $horas, $mins);
                     }),
@@ -55,12 +56,12 @@ class DisfrutesRelationManager extends RelationManager
             ])
             ->filters([])
             ->recordActions([
-                //hay que crear 3 acciones aprobar, rechazar y editar
+                // hay que crear 3 acciones aprobar, rechazar y editar
                 AprobarDisfrute::make('aprobar_disfrute')
-                    ->hidden(fn($record) => $record->status !== StatusSolicitudes::Solicitado),
+                    ->hidden(fn ($record) => $record->status !== StatusSolicitudes::Solicitado),
                 RechazarDisfrute::make('rechazar_disfrute')
 
-                    ->hidden(fn($record) => $record->status !== StatusSolicitudes::Solicitado),
+                    ->hidden(fn ($record) => $record->status !== StatusSolicitudes::Solicitado),
 
             ])
             ->headerActions([
@@ -82,28 +83,24 @@ class DisfrutesRelationManager extends RelationManager
                             ->closeOnDateSelection()
                             ->disabledDates(function () {
                                 $start = Carbon::now()->addYear(-10)->startOfMonth();
-                                $end   = Carbon::now();
+                                $end = Carbon::now();
 
                                 $period = CarbonPeriod::create($start, $end);
                                 $disabled = [];
 
                                 foreach ($period as $date) {
-                                    //desabilitar fechas anteriores a la actual
+                                    // desabilitar fechas anteriores a la actual
                                     if ($date->isPast()) {
                                         $disabled[] = $date->translatedFormat('Y-m-d');
                                     }
                                 }
-                                //desabilitar fechas ya solicitadas
+                                // desabilitar fechas ya solicitadas
                                 $diasSolicitados = $this->getOwnerRecord()->user->disfrutes()->get();
-
-
 
                                 foreach ($diasSolicitados as $dia) {
 
                                     $disabled[] = Carbon::parse($dia->fecha_disfrute)->translatedFormat('Y-m-d');
                                 }
-
-
 
                                 return $disabled;
                             }),
@@ -112,21 +109,21 @@ class DisfrutesRelationManager extends RelationManager
                             ->label(__('Horas solicitadas'))
                             ->required()
                             ->native(false)
-                            //limitar maximo de horas a solicitar a 9 horas
+                            // limitar maximo de horas a solicitar a 9 horas
                             ->maxDate(Carbon::createFromTime(9, 0, 0))
 
                             ->suffixIcon('heroicon-o-clock')
                             ->seconds(false)
                             ->locale('es')
                             ->format('H:i')
-                            ->displayFormat('H:i')
+                            ->displayFormat('H:i'),
 
                     ])
                     ->action(function ($data, $livewire) {
                         $computo = $this->getOwnerRecord();
                         $minutos_solicitados = (Carbon::parse($data['minutos_solicitados'])->hour * 60) + (Carbon::parse($data['minutos_solicitados'])->minute);
-                        //antes de crear el disfrute, verificar que el usuario tenga minutos disponibles para solicitar el día de computo, para esto se debe restar los minutos solicitados a los minutos disponibles del computo, si el resultado es negativo, mostrar una notificación de error y no crear el disfrute, si el resultado es positivo o cero, crear el disfrute normalmente
-                        //para poder solicitar minimo debes disponer de la menos 3 hora 30 minutos para solicitar un día de computo, esto es para evitar que los usuarios soliciten días de computo sin tener suficientes minutos disponibles, para esto se puede hacer una validación antes de crear el disfrute, si el usuario no tiene al menos 30 minutos disponibles, mostrar una notificación de error y no crear el disfrute
+                        // antes de crear el disfrute, verificar que el usuario tenga minutos disponibles para solicitar el día de computo, para esto se debe restar los minutos solicitados a los minutos disponibles del computo, si el resultado es negativo, mostrar una notificación de error y no crear el disfrute, si el resultado es positivo o cero, crear el disfrute normalmente
+                        // para poder solicitar minimo debes disponer de la menos 3 hora 30 minutos para solicitar un día de computo, esto es para evitar que los usuarios soliciten días de computo sin tener suficientes minutos disponibles, para esto se puede hacer una validación antes de crear el disfrute, si el usuario no tiene al menos 30 minutos disponibles, mostrar una notificación de error y no crear el disfrute
 
                         $min_disponibles = $this->getOwnerRecord()->disponible;
                         $min_solicitados = $this->getOwnerRecord()->disfrutes()->sum('minutos_solicitados');
@@ -138,11 +135,12 @@ class DisfrutesRelationManager extends RelationManager
                                 ->icon('heroicon-o-x-circle')
                                 ->danger()
                                 ->send();
+
                             return;
                         }
 
                         $dia_solicitado = $computo->disfrutes()->create([
-                            'user_id' =>  $this->getOwnerRecord()->user_id,
+                            'user_id' => $this->getOwnerRecord()->user_id,
                             'fecha_disfrute' => $data['fecha_disfrute'],
                             'minutos_solicitados' => Carbon::parse($data['minutos_solicitados'])->hour * 60 + Carbon::parse($data['minutos_solicitados'])->minute,
                             'status' => StatusSolicitudes::Solicitado,
@@ -154,8 +152,7 @@ class DisfrutesRelationManager extends RelationManager
 
                             ->success()
                             ->send();
-                        //notificar al admin por correo
-
+                        // notificar al admin por correo
 
                         $this->getOwnerRecord()->refresh();
                         $admins = User::where('role', 'super_admin')->get();
@@ -165,12 +162,12 @@ class DisfrutesRelationManager extends RelationManager
                             ->success()
                             ->sendToDatabase($admins);
                         FacadesNotification::send($admins, new NotificacionSolicitudDiaComputo($dia_solicitado, $this->getOwnerRecord()));
-                        //actualiza el registro del computo para reflejar el nuevo número de minutos disponibles, esto se puede hacer refrescando el registro del computo para que se vuelva a calcular el número de minutos disponibles con la nueva solicitud de día de computo
+                        // actualiza el registro del computo para reflejar el nuevo número de minutos disponibles, esto se puede hacer refrescando el registro del computo para que se vuelva a calcular el número de minutos disponibles con la nueva solicitud de día de computo
 
-                        //actulaizar el sidebar para reflejar el nuevo número de minutos disponibles
+                        // actulaizar el sidebar para reflejar el nuevo número de minutos disponibles
                         $livewire->dispatch('refresh-sidebar');
 
-                        $livewire->dispatch('updateData', $data); //enviar un evento a la infolist para que se actualice el número de minutos disponibles en el sidebar
+                        $livewire->dispatch('updateData', $data); // enviar un evento a la infolist para que se actualice el número de minutos disponibles en el sidebar
                     }),
             ]);
     }
