@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "manual:capture": "node scripts/capture-manuals.mjs"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.2.1",
